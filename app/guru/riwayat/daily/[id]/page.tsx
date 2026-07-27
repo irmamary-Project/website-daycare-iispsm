@@ -42,7 +42,7 @@ export default async function DailyDetailPage({
 
   return (
     <DailyDetailClient>
-      <div id="daily-report-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border p-6 print:p-4">
+      <div id="daily-report-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border sm:p-6 p-4 print:p-4">
         <div className="text-center border-b pb-4 mb-6">
           <h1 className="text-xl font-bold text-gray-800">Daily Report</h1>
           <p className="text-sm text-gray-500">IIS PSM Daycare & Preschool Magetan</p>
@@ -51,98 +51,44 @@ export default async function DailyDetailPage({
           </p>
         </div>
 
-        <table className="w-full text-sm">
-          <tbody>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600 w-48">Nama Siswa</td>
-              <td className="py-2">{report.siswa?.nama ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Kehadiran</td>
-              <td className="py-2">{report.kehadiran}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Mood Datang</td>
-              <td className="py-2">{report.mood_datang ? `${moodMap[report.mood_datang]?.emoji ?? ""} ${report.mood_datang}` : "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Mood Pulang</td>
-              <td className="py-2">{report.mood_pulang ? `${moodMap[report.mood_pulang]?.emoji ?? ""} ${report.mood_pulang}` : "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Kondisi Kesehatan</td>
-              <td className="py-2">{report.kondisi_kesehatan ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Suhu Tubuh</td>
-              <td className="py-2">{report.suhu_tubuh ? `${report.suhu_tubuh}°C` : "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Sarapan</td>
-              <td className="py-2">{report.sarapan ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Snack Pagi</td>
-              <td className="py-2">{report.snack_pagi ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Makan Siang</td>
-              <td className="py-2">{report.makan_siang ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Snack Sore</td>
-              <td className="py-2">{report.snack_sore ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Minum</td>
-              <td className="py-2">{report.minum_gelas ? `${report.minum_gelas} gelas` : "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Tidur Siang</td>
-              <td className="py-2">{report.tidur_siang ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Durasi Tidur</td>
-              <td className="py-2">{report.durasi_tidur ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">BAK</td>
-              <td className="py-2">{report.bak_kali ? `${report.bak_kali} kali` : "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">BAB</td>
-              <td className="py-2">{report.bab ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Ibadah & Aktivitas</td>
-              <td className="py-2">
-                {report.ibadah_checklist?.length
-                  ? report.ibadah_checklist.map((i: string) => `✅ ${i}`).join(", ")
-                  : "-"}
-              </td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Fitrah Distimulasi</td>
-              <td className="py-2">
-                {report.fitrah_distimulasi?.length
-                  ? report.fitrah_distimulasi.map((f: string) => `${fitrahMap[f]?.icon ?? ""} ${fitrahMap[f]?.label ?? f}`).join(", ")
-                  : "-"}
-              </td>
-            </tr>
-            {report.observasi_guru && (
-              <tr className="border-b">
-                <td className="py-2 pr-4 font-medium text-gray-600 align-top">Observasi Guru</td>
-                <td className="py-2 whitespace-pre-wrap">{report.observasi_guru}</td>
-              </tr>
-            )}
-            {report.catatan_ortu && (
-              <tr className="border-b">
-                <td className="py-2 pr-4 font-medium text-gray-600 align-top">Catatan untuk Orang Tua</td>
-                <td className="py-2 whitespace-pre-wrap">{report.catatan_ortu}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <div className="divide-y divide-gray-100 text-sm">
+          {[
+            ["Nama Siswa", report.siswa?.nama ?? "-"],
+            ["Kehadiran", report.kehadiran],
+            ["Mood Datang", report.mood_datang ? `${moodMap[report.mood_datang]?.emoji ?? ""} ${report.mood_datang}` : "-"],
+            ["Mood Pulang", report.mood_pulang ? `${moodMap[report.mood_pulang]?.emoji ?? ""} ${report.mood_pulang}` : "-"],
+            ["Kondisi Kesehatan", report.kondisi_kesehatan ?? "-"],
+            ["Suhu Tubuh", report.suhu_tubuh ? `${report.suhu_tubuh}°C` : "-"],
+            ["Sarapan", report.sarapan ?? "-"],
+            ["Snack Pagi", report.snack_pagi ?? "-"],
+            ["Makan Siang", report.makan_siang ?? "-"],
+            ["Snack Sore", report.snack_sore ?? "-"],
+            ["Minum", report.minum_gelas ? `${report.minum_gelas} gelas` : "-"],
+            ["Tidur Siang", report.tidur_siang ?? "-"],
+            ["Durasi Tidur", report.durasi_tidur ?? "-"],
+            ["BAK", report.bak_kali ? `${report.bak_kali} kali` : "-"],
+            ["BAB", report.bab ?? "-"],
+            ["Ibadah & Aktivitas", report.ibadah_checklist?.length ? report.ibadah_checklist.map((i: string) => `✅ ${i}`).join(", ") : "-"],
+            ["Fitrah Distimulasi", report.fitrah_distimulasi?.length ? report.fitrah_distimulasi.map((f: string) => `${fitrahMap[f]?.icon ?? ""} ${fitrahMap[f]?.label ?? f}`).join(", ") : "-"],
+          ].map(([label, value]) => (
+            <div key={label as string} className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+              <span className="font-medium text-gray-600 text-xs sm:text-sm">{label as string}</span>
+              <span className="text-gray-800 text-sm sm:text-base">{value as string}</span>
+            </div>
+          ))}
+          {report.observasi_guru && (
+            <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+              <span className="font-medium text-gray-600 text-xs sm:text-sm">Observasi Guru</span>
+              <span className="text-gray-800 text-sm sm:text-base whitespace-pre-wrap">{report.observasi_guru}</span>
+            </div>
+          )}
+          {report.catatan_ortu && (
+            <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+              <span className="font-medium text-gray-600 text-xs sm:text-sm">Catatan untuk Orang Tua</span>
+              <span className="text-gray-800 text-sm sm:text-base whitespace-pre-wrap">{report.catatan_ortu}</span>
+            </div>
+          )}
+        </div>
 
         <div className="text-right text-xs text-gray-400 mt-6 pt-4 border-t">
           Status: {report.status === "terkirim" ? "✓ Terkirim" : "Draft"}

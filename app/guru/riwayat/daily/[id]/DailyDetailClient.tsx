@@ -5,7 +5,7 @@ import PDFExportButton from "@/components/riwayat/PDFExportButton";
 
 export default function DailyDetailClient({ children }: { children: React.ReactNode }) {
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <Link
           href="/guru/riwayat"

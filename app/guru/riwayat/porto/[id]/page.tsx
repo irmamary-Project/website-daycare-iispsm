@@ -40,7 +40,7 @@ export default async function PortoDetailPage({
 
   return (
     <PortoDetailClient>
-      <div id="porto-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border p-6 print:p-4">
+      <div id="porto-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border sm:p-6 p-4 print:p-4">
         <div className="text-center border-b pb-4 mb-6">
           <h1 className="text-xl font-bold text-gray-800">Portofolio</h1>
           <p className="text-sm text-gray-500">IIS PSM Daycare & Preschool Magetan</p>
@@ -50,60 +50,56 @@ export default async function PortoDetailPage({
           </p>
         </div>
 
-        <table className="w-full text-sm">
-          <tbody>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600 w-48">Nama Siswa</td>
-              <td className="py-2">{porto.siswa?.nama ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Fitrah Distimulasi</td>
-              <td className="py-2">
-                {porto.fitrah?.length
-                  ? porto.fitrah.map((f: string) => `${fitrahMap[f]?.icon ?? ""} ${fitrahMap[f]?.label ?? f}`).join(", ")
-                  : "-"}
-              </td>
-            </tr>
-            {porto.observasi && (
-              <tr className="border-b">
-                <td className="py-2 pr-4 font-medium text-gray-600 align-top">Observasi</td>
-                <td className="py-2 whitespace-pre-wrap">{porto.observasi}</td>
-              </tr>
-            )}
-            {porto.catatan_ortu && (
-              <tr className="border-b">
-                <td className="py-2 pr-4 font-medium text-gray-600 align-top">Catatan untuk Orang Tua</td>
-                <td className="py-2 whitespace-pre-wrap">{porto.catatan_ortu}</td>
-              </tr>
-            )}
-            {porto.portofolio_media && porto.portofolio_media.length > 0 && (
-              <tr className="border-b">
-                <td className="py-2 pr-4 font-medium text-gray-600 align-top">Media ({porto.portofolio_media.length})</td>
-                <td className="py-2">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {porto.portofolio_media.map((m: any) => (
-                      <div key={m.id} className="rounded-lg overflow-hidden border bg-gray-50">
-                        {m.tipe === "foto" ? (
-                          <img
-                            src={m.url}
-                            alt={m.nama_file ?? "Foto"}
-                            crossOrigin="anonymous"
-                            className="w-full h-72 object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-72 flex items-center justify-center bg-gray-100 text-gray-400 text-sm">
-                            🎬 {m.nama_file ?? "Video"}
-                          </div>
-                        )}
+        <div className="divide-y divide-gray-100 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+            <span className="font-medium text-gray-600 text-xs sm:text-sm">Nama Siswa</span>
+            <span className="text-gray-800 text-sm sm:text-base">{porto.siswa?.nama ?? "-"}</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+            <span className="font-medium text-gray-600 text-xs sm:text-sm">Fitrah Distimulasi</span>
+            <span className="text-gray-800 text-sm sm:text-base">
+              {porto.fitrah?.length
+                ? porto.fitrah.map((f: string) => `${fitrahMap[f]?.icon ?? ""} ${fitrahMap[f]?.label ?? f}`).join(", ")
+                : "-"}
+            </span>
+          </div>
+          {porto.observasi && (
+            <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+              <span className="font-medium text-gray-600 text-xs sm:text-sm">Observasi</span>
+              <span className="text-gray-800 text-sm sm:text-base whitespace-pre-wrap">{porto.observasi}</span>
+            </div>
+          )}
+          {porto.catatan_ortu && (
+            <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+              <span className="font-medium text-gray-600 text-xs sm:text-sm">Catatan untuk Orang Tua</span>
+              <span className="text-gray-800 text-sm sm:text-base whitespace-pre-wrap">{porto.catatan_ortu}</span>
+            </div>
+          )}
+          {porto.portofolio_media && porto.portofolio_media.length > 0 && (
+            <div className="py-3">
+              <span className="font-medium text-gray-600 text-xs sm:text-sm block mb-2">Media ({porto.portofolio_media.length})</span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                {porto.portofolio_media.map((m: any) => (
+                  <div key={m.id} className="rounded-lg overflow-hidden border bg-gray-50">
+                    {m.tipe === "foto" ? (
+                      <img
+                        src={m.url}
+                        alt={m.nama_file ?? "Foto"}
+                        crossOrigin="anonymous"
+                        className="w-full aspect-square object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full aspect-square flex items-center justify-center bg-gray-100 text-gray-400 text-xs sm:text-sm">
+                        🎬 {m.nama_file ?? "Video"}
                       </div>
-                    ))}
+                    )}
                   </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="text-right text-xs text-gray-400 mt-6 pt-4 border-t">
           Status: {porto.status === "terkirim" ? "✓ Terkirim" : "Draft"}

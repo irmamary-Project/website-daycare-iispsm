@@ -41,7 +41,7 @@ export default async function LaporanDetailPage({
 
   return (
     <LaporanDetailClient>
-      <div id="laporan-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border p-6 print:p-4">
+      <div id="laporan-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border sm:p-6 p-4 print:p-4">
         <div className="text-center border-b pb-4 mb-6">
           <h1 className="text-xl font-bold text-gray-800">Laporan Perkembangan Triwulan</h1>
           <p className="text-sm text-gray-500">IIS PSM Daycare & Preschool Magetan</p>
@@ -50,56 +50,56 @@ export default async function LaporanDetailPage({
           </p>
         </div>
 
-        <table className="w-full text-sm">
-          <tbody>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600 w-48">Nama Siswa</td>
-              <td className="py-2">{laporan.siswa?.nama ?? "-"}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 pr-4 font-medium text-gray-600">Periode</td>
-              <td className="py-2">{laporan.periode} {laporan.tahun}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="divide-y divide-gray-100 text-sm mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+            <span className="font-medium text-gray-600 text-xs sm:text-sm">Nama Siswa</span>
+            <span className="text-gray-800 text-sm sm:text-base">{laporan.siswa?.nama ?? "-"}</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-1 sm:gap-3 py-3">
+            <span className="font-medium text-gray-600 text-xs sm:text-sm">Periode</span>
+            <span className="text-gray-800 text-sm sm:text-base">{laporan.periode} {laporan.tahun}</span>
+          </div>
+        </div>
 
-        <h3 className="font-semibold text-gray-700 mt-6 mb-3">Penilaian 8 Fitrah</h3>
+        <h3 className="font-semibold text-gray-700 mb-3 text-sm sm:text-base">Penilaian 8 Fitrah</h3>
 
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="text-left py-2 px-3 border font-medium text-gray-600">Fitrah</th>
-              <th className="text-left py-2 px-3 border font-medium text-gray-600">Capaian</th>
-              <th className="text-left py-2 px-3 border font-medium text-gray-600">Catatan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fitrahKeys.map((key) => {
-              const col = `fitrah_${key}` as keyof typeof laporan;
-              const data = laporan[col] as { capaian?: string; catatan?: string } | null;
-              return (
-                <tr key={key} className="border-b">
-                  <td className="py-2 px-3 border font-medium text-gray-700">
-                    {FITRAH_LIST.find(f => f.key === key)?.icon} {FITRAH_LIST.find(f => f.key === key)?.label ?? key}
-                  </td>
-                  <td className="py-2 px-3 border">{data?.capaian ? capaianLabel[data.capaian] ?? data.capaian : "-"}</td>
-                  <td className="py-2 px-3 border text-gray-600">{data?.catatan ?? "-"}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <table className="w-full text-sm border-collapse min-w-[500px] sm:min-w-0">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="text-left py-2 px-3 border font-medium text-gray-600 whitespace-nowrap">Fitrah</th>
+                <th className="text-left py-2 px-3 border font-medium text-gray-600 whitespace-nowrap">Capaian</th>
+                <th className="text-left py-2 px-3 border font-medium text-gray-600">Catatan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fitrahKeys.map((key) => {
+                const col = `fitrah_${key}` as keyof typeof laporan;
+                const data = laporan[col] as { capaian?: string; catatan?: string } | null;
+                return (
+                  <tr key={key} className="border-b">
+                    <td className="py-2 px-3 border font-medium text-gray-700 whitespace-nowrap">
+                      {FITRAH_LIST.find(f => f.key === key)?.icon} {FITRAH_LIST.find(f => f.key === key)?.label ?? key}
+                    </td>
+                    <td className="py-2 px-3 border whitespace-nowrap">{data?.capaian ? capaianLabel[data.capaian] ?? data.capaian : "-"}</td>
+                    <td className="py-2 px-3 border text-gray-600">{data?.catatan ?? "-"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
         {laporan.catatan_umum && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-semibold text-gray-700 mb-1">Catatan Umum</h4>
+          <div className="mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-700 mb-1 text-sm sm:text-base">Catatan Umum</h4>
             <p className="text-sm text-gray-600 whitespace-pre-wrap">{laporan.catatan_umum}</p>
           </div>
         )}
 
         {laporan.rekomendasi && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-semibold text-gray-700 mb-1">Rekomendasi</h4>
+          <div className="mt-4 p-3 sm:p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-semibold text-gray-700 mb-1 text-sm sm:text-base">Rekomendasi</h4>
             <p className="text-sm text-gray-600 whitespace-pre-wrap">{laporan.rekomendasi}</p>
           </div>
         )}
