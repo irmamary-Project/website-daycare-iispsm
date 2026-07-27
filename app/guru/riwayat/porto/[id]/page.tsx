@@ -80,10 +80,22 @@ export default async function PortoDetailPage({
               <tr className="border-b">
                 <td className="py-2 pr-4 font-medium text-gray-600 align-top">Media ({porto.portofolio_media.length})</td>
                 <td className="py-2">
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {porto.portofolio_media.map((m: any) => (
-                      <div key={m.id} className="text-xs text-gray-500">
-                        {m.tipe === "foto" ? "🖼️" : "🎬"} {m.nama_file ?? "Media"}
+                      <div key={m.id} className="rounded-lg overflow-hidden border bg-gray-50">
+                        {m.tipe === "foto" ? (
+                          <img
+                            src={m.url}
+                            alt={m.nama_file ?? "Foto"}
+                            crossOrigin="anonymous"
+                            className="w-full h-40 object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-40 flex items-center justify-center bg-gray-100 text-gray-400 text-sm">
+                            🎬 {m.nama_file ?? "Video"}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
