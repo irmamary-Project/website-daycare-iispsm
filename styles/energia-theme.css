@@ -1,0 +1,211 @@
+/* ═══════════════════════════════════════════
+   ENERGIA KIDS DAYCARE — Global Theme
+   Import ini di layout.tsx atau _app.tsx
+   ═══════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap');
+
+/* ── CSS VARIABLES ── */
+:root {
+  /* Primary — Navy (dari ungu logo) */
+  --primary:         #1A237E;
+  --primary-mid:     #3949AB;
+  --primary-light:   #5C6BC0;
+  --primary-pale:    #E8EAF6;
+  --primary-border:  #C5CAE9;
+
+  /* Accent — Orange (dari logo) */
+  --gold:            #FF9800;
+  --gold-dark:       #F57C00;
+  --gold-pale:       #FFF3E0;
+
+  /* Warna-warni logo */
+  --teal:            #00BCD4;
+  --teal-pale:       #E0F7FA;
+  --magenta:         #E91E8C;
+  --magenta-pale:    #FCE4EC;
+  --logo-green:      #4CAF50;
+  --logo-green-pale: #E8F5E9;
+  --purple:          #673AB7;
+  --purple-pale:     #F3E5F5;
+  --amber:           #FFC107;
+  --amber-pale:      #FFF9C4;
+
+  /* Backgrounds */
+  --cream:           #F8F9FF;
+  --cream2:          #FFFBF5;
+  --white:           #FFFFFF;
+
+  /* Text */
+  --text:            #1A237E;
+  --text-body:       #455A64;
+  --text-muted:      #90A4AE;
+  --text-light:      #B0BEC5;
+
+  /* Sidebar khusus */
+  --sidebar-bg:        #1A237E;
+  --sidebar-hover:     rgba(255, 255, 255, 0.10);
+  --sidebar-active:    rgba(255, 255, 255, 0.16);
+  --sidebar-border:    rgba(255, 255, 255, 0.10);
+  --sidebar-text:      rgba(255, 255, 255, 0.65);
+  --sidebar-text-active: #FFFFFF;
+
+  /* Legacy aliases (agar komponen lama tetap jalan) */
+  --green-dark:      #1A237E;
+  --green-mid:       #3949AB;
+  --green-pale:      #E8EAF6;
+  --green-border:    #C5CAE9;
+
+  /* Border radius */
+  --radius:          12px;
+  --radius-lg:       20px;
+  --radius-sm:       8px;
+
+  /* Shadow */
+  --shadow-sm:  0 2px 8px rgba(26, 35, 126, 0.08);
+  --shadow-md:  0 8px 24px rgba(26, 35, 126, 0.12);
+  --shadow-lg:  0 16px 48px rgba(26, 35, 126, 0.16);
+}
+
+/* ── BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Nunito", sans-serif;
+  color: var(--text-body);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Fredoka", sans-serif;
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+/* ── UTILITY CLASSES ── */
+
+/* Font */
+.font-fredoka { font-family: "Fredoka", sans-serif !important; }
+.font-nunito  { font-family: "Nunito", sans-serif !important; }
+
+/* Warna teks */
+.text-primary  { color: var(--primary); }
+.text-gold     { color: var(--gold); }
+.text-magenta  { color: var(--magenta); }
+.text-teal     { color: var(--teal); }
+.text-muted    { color: var(--text-muted); }
+.text-body     { color: var(--text-body); }
+
+/* Background */
+.bg-primary    { background: var(--primary); }
+.bg-cream      { background: var(--cream); }
+.bg-cream2     { background: var(--cream2); }
+.bg-pale       { background: var(--primary-pale); }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 14px;
+}
+.btn-primary:hover { background: var(--primary-mid); transform: translateY(-1px); }
+
+.btn-gold {
+  background: var(--gold);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 14px;
+}
+.btn-gold:hover { background: var(--gold-dark); transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  padding: 9px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+}
+.btn-outline:hover { background: var(--primary-pale); }
+
+/* ── CARD BASE ── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--primary-border);
+  padding: 24px;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  transition: all 0.25s;
+}
+
+/* ── BADGE ── */
+.badge {
+  font-family: "Nunito", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+}
+.badge-primary { background: var(--primary-pale); color: var(--primary); }
+.badge-gold    { background: var(--gold-pale);    color: var(--gold-dark); }
+.badge-teal    { background: var(--teal-pale);    color: #006064; }
+.badge-green   { background: var(--logo-green-pale); color: #1B5E20; }
+.badge-magenta { background: var(--magenta-pale); color: #880E4F; }
+.badge-purple  { background: var(--purple-pale);  color: #311B92; }
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-family: "Nunito", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 8px;
+}
+.sec-title {
+  font-family: "Fredoka", sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+.sec-desc {
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  color: var(--text-body);
+  line-height: 1.7;
+}
+
+/* ── SIDEBAR UTILITIES ── */
+.sidebar-bg     { background: var(--sidebar-bg); }
+.sidebar-item {
+  font-family: "Nunito", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sidebar-text);
+  transition: all 0.2s;
+}
+.sidebar-item:hover   { color: var(--sidebar-text-active); background: var(--sidebar-hover); }
+.sidebar-item.active  { color: var(--sidebar-text-active); background: var(--sidebar-active); }

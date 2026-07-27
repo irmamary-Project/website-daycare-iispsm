@@ -1,0 +1,9 @@
+node_modules
+.next
+.env
+.env.local
+.env.*.local
+.mimocode
+._distill_query*.py
+supabase/migrations/*.sql
+supabase/schema.sql

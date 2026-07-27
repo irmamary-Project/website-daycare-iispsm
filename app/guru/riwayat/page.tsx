@@ -1,0 +1,69 @@
+import { createClient } from "@/lib/supabase/server";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+
+export default async function RiwayatPage() {
+  const supabase = await createClient();
+
+  const [{ data: dailyReports }, { data: portofolios }, { data: laporans }] = await Promise.all([
+    supabase.from("daily_reports").select("*, siswa(nama)").order("created_at", { ascending: false }).limit(20),
+    supabase.from("portofolio").select("*, siswa(nama), portofolio_media(id)").order("created_at", { ascending: false }).limit(20),
+    supabase.from("laporan_triwulan").select("*, siswa(nama)").order("created_at", { ascending: false }).limit(20),
+  ]);
+
+  // Merge and sort all
+  const all = [
+    ...(dailyReports ?? []).map(r => ({ ...r, _type: "daily", _date: r.created_at })),
+    ...(portofolios ?? []).map(r => ({ ...r, _type: "porto", _date: r.created_at })),
+    ...(laporans ?? []).map(r => ({ ...r, _type: "laporan", _date: r.created_at })),
+  ].sort((a, b) => new Date(b._date).getTime() - new Date(a._date).getTime());
+
+  const typeConfig: Record<string, { icon: string; label: string; color: string }> = {
+    daily:   { icon: "✅", label: "Daily Report",     color: "bg-green-50 text-green-700" },
+    porto:   { icon: "📷", label: "Portofolio",       color: "bg-blue-50 text-blue-700" },
+    laporan: { icon: "📋", label: "Laporan Triwulan", color: "bg-orange-50 text-orange-700" },
+  };
+
+  return (
+    <div className="p-8">
+      <h1 className="font-serif text-3xl font-bold text-[var(--primary)] mb-2">🕘 Riwayat</h1>
+      <p className="text-sm text-gray-500 mb-8">Semua laporan dan portofolio yang telah dibuat</p>
+
+      <div className="space-y-3">
+        {all.map((item: any) => {
+          const cfg = typeConfig[item._type];
+          return (
+            <div key={`${item._type}-${item.id}`} className="card flex items-start gap-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${cfg.color}`}>
+                {cfg.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-gray-800">
+                  {cfg.label} – {item.siswa?.nama ?? "–"}
+                </div>
+                <div className="text-xs text-gray-400 mt-0.5">
+                  {item._type === "laporan" ? `Periode ${item.periode}` : format(new Date(item.tanggal || item._date), "d MMMM yyyy", { locale: id })}
+                  {" · "}
+                  {item._type === "porto" && `${item.portofolio_media?.length ?? 0} media`}
+                  {item._type === "daily" && item.kehadiran}
+                  {item._type === "laporan" && item.tahun}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className={item.status === "terkirim" ? "badge-sent" : "badge-draft"}>
+                  {item.status === "terkirim" ? "Terkirim" : "Draft"}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+        {all.length === 0 && (
+          <div className="card text-center py-16 text-gray-400">
+            <div className="text-4xl mb-3">📭</div>
+            <p>Belum ada laporan atau portofolio.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
