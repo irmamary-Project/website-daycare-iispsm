@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { FITRAH_LIST } from "@/types";
+import PortfolioMedia from "./Lightbox";
 
 export default async function OrtuPortofolioPage() {
   const supabase = await createClient();
@@ -99,31 +100,23 @@ export default async function OrtuPortofolioPage() {
         <div className="space-y-6">
           {portofolio.map((p: any) => (
             <div key={p.id} className="card">
-              <div className="flex items-center justify-between mb-3">
-                <div>
+              <div className="mb-3">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-semibold text-gray-800">{p.siswa?.nama}</span>
-                  <span className="text-sm text-gray-400 ml-2">{format(new Date(p.tanggal), "d MMMM yyyy", { locale: id })}</span>
+                  <span className="text-sm text-gray-400">{format(new Date(p.tanggal), "d MMMM yyyy", { locale: id })}</span>
                 </div>
-                <div className="flex gap-1.5">
-                  {p.fitrah?.map((key: string) => {
-                    const f = FITRAH_LIST.find(fl => fl.key === key);
-                    return f ? <span key={key} className="text-xs bg-primary-pale text-primary px-2 py-0.5 rounded-full">{f.icon} {f.label}</span> : null;
-                  })}
-                </div>
+                {p.fitrah?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {p.fitrah.map((key: string) => {
+                      const f = FITRAH_LIST.find(fl => fl.key === key);
+                      return f ? <span key={key} className="text-xs bg-primary-pale text-primary px-2 py-0.5 rounded-full">{f.icon} {f.label}</span> : null;
+                    })}
+                  </div>
+                )}
               </div>
 
               {p.portofolio_media?.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                  {p.portofolio_media.map((m: any) => (
-                    <div key={m.id} className="rounded-xl overflow-hidden bg-primary-pale aspect-square">
-                      {m.tipe === "foto" ? (
-                        <img src={m.url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <video src={m.url} className="w-full h-full object-cover" controls />
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <PortfolioMedia media={p.portofolio_media} />
               )}
 
               {p.observasi && (
