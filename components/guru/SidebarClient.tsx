@@ -22,6 +22,7 @@ const NAV = [
 ];
 
 const ADMIN_NAV = [
+  { href: "/guru/admission",       icon: "📋", label: "Persetujuan Daftar" },
   { href: "/guru/absensi/admin",    icon: "👥", label: "Rekap Absensi" },
   { href: "/guru/absensi/geofence", icon: "📍", label: "Atur Geofence" },
 ];

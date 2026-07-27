@@ -111,7 +111,7 @@ export default function AdmissionClient() {
       tanggal_lahir: anakLahir || null,
       kelas: anakKelas,
       ortu_id: userId,
-      status: "aktif",
+      status: "pending",
     });
 
     if (siswaErr) {
@@ -128,17 +128,17 @@ export default function AdmissionClient() {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--cream)" }}>
         <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">🎉</div>
+          <div className="text-6xl mb-4">📋</div>
           <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "Fredoka, sans-serif", color: "var(--primary)" }}>
-            Pendaftaran Berhasil!
+            Pendaftaran Terkirim!
           </h1>
           <p className="text-sm mb-6" style={{ color: "var(--text-body)" }}>
-            Akun untuk <strong>{fullName}</strong> telah dibuat. Data anak <strong>{anakNama}</strong> sudah tercatat.
-            Silakan cek email untuk verifikasi, lalu login ke portal orang tua.
+            Terima kasih <strong>{fullName}</strong>. Data <strong>{anakNama}</strong> sudah kami terima.
+            Admin akan memproses pendaftaran dalam 1x24 jam. kamu akan mendapat notifikasi setelah disetujui.
           </p>
           <Link href="/login" className="inline-block px-6 py-3 rounded-full text-sm font-bold text-white transition-all"
             style={{ background: "var(--primary)" }}>
-            Login ke Portal →
+            Cek Status Pendaftaran →
           </Link>
         </div>
       </div>

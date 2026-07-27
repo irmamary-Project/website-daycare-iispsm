@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       tanggal_lahir: row.tanggal_lahir || null,
       kelas: row.kelas || "KB Preschool 1",
       ortu_id: ortuId,
-      status: ["aktif", "cuti", "alumni"].includes(row.status) ? row.status : "aktif",
+      status: ["aktif", "cuti", "alumni", "pending", "ditolak"].includes(row.status) ? row.status : "aktif",
       catatan: row.catatan || null,
     };
 

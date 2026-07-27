@@ -12,7 +12,7 @@ interface Props {
 const EMPTY_FORM = {
   nama: "", jenis_kelamin: "L" as "L" | "P",
   tanggal_lahir: "", kelas: "KB Preschool 1",
-  ortu_id: "", status: "aktif" as "aktif" | "cuti" | "alumni", catatan: "",
+  ortu_id: "", status: "aktif" as Siswa["status"], catatan: "",
 };
 
 export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin }: Props) {

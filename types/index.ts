@@ -18,7 +18,7 @@ export interface Siswa {
   foto_url?: string;
   ortu_id?: string;
   guru_id?: string;
-  status: "aktif" | "cuti" | "alumni";
+  status: "aktif" | "cuti" | "alumni" | "pending" | "ditolak";
   catatan?: string;
   created_at: string;
   // joined

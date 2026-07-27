@@ -12,7 +12,30 @@ export default async function OrtuDashboard() {
   const { data: anak } = await supabase.from("siswa")
     .select("*").eq("ortu_id", user.id).eq("status", "aktif");
 
+  const { data: pendingAnak } = await supabase.from("siswa")
+    .select("id", { count: "exact", head: true }).eq("ortu_id", user.id).eq("status", "pending");
+
   if (!anak || anak.length === 0) {
+    if (pendingAnak && pendingAnak.length > 0) {
+      return (
+        <div className="p-8 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center max-w-md">
+            <div className="text-6xl mb-4">⏳</div>
+            <h2 className="font-display text-2xl font-bold text-primary mb-3">Menunggu Persetujuan</h2>
+            <p className="text-gray-500 text-sm leading-relaxed mb-4">
+              Pendaftaran <strong>{pendingAnak.length}</strong> anak Anda sedang diproses oleh admin.
+              Silakan tunggu konfirmasi dalam 1x24 jam. Kami akan memberi tahu jika sudah disetujui.
+            </p>
+            <div className="card bg-yellow-50 border-yellow-200 text-sm text-gray-700">
+              <p className="font-medium mb-1">Email akun Anda:</p>
+              <p className="font-mono text-xs">{user?.email}</p>
+              <p className="text-gray-500 text-xs mt-2">Hubungi admin jika ada pertanyaan.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-md">
