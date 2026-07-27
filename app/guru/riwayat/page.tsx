@@ -1,6 +1,13 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+
+const DETAIL_LINKS: Record<string, (id: string) => string> = {
+  daily:   (id) => `/guru/riwayat/daily/${id}`,
+  porto:   (id) => `/guru/riwayat/porto/${id}`,
+  laporan: (id) => `/guru/riwayat/laporan/${id}`,
+};
 
 export default async function RiwayatPage() {
   const supabase = await createClient();
@@ -32,8 +39,13 @@ export default async function RiwayatPage() {
       <div className="space-y-3">
         {all.map((item: any) => {
           const cfg = typeConfig[item._type];
+          const href = DETAIL_LINKS[item._type]?.(item.id);
           return (
-            <div key={`${item._type}-${item.id}`} className="card flex items-start gap-4">
+            <Link
+              key={`${item._type}-${item.id}`}
+              href={href ?? "#"}
+              className="card flex items-start gap-4 hover:shadow-md transition-shadow cursor-pointer !no-underline"
+            >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${cfg.color}`}>
                 {cfg.icon}
               </div>
@@ -54,7 +66,7 @@ export default async function RiwayatPage() {
                   {item.status === "terkirim" ? "Terkirim" : "Draft"}
                 </span>
               </div>
-            </div>
+            </Link>
           );
         })}
         {all.length === 0 && (
