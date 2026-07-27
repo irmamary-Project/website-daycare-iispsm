@@ -40,7 +40,7 @@ export default async function LaporanDetailPage({
   const fitrahKeys = FITRAH_LIST.map(f => f.key);
 
   return (
-    <LaporanDetailClient>
+    <LaporanDetailClient data={laporan}>
       <div id="laporan-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border sm:p-6 p-4 print:p-4">
         <div className="text-center border-b pb-4 mb-6">
           <h1 className="text-xl font-bold text-gray-800">Laporan Perkembangan Triwulan</h1>

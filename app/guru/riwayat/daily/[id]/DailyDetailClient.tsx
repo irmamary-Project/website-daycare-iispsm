@@ -3,7 +3,7 @@
 import Link from "next/link";
 import PDFExportButton from "@/components/riwayat/PDFExportButton";
 
-export default function DailyDetailClient({ children }: { children: React.ReactNode }) {
+export default function DailyDetailClient({ children, data }: { children: React.ReactNode; data: any }) {
   return (
     <div className="p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
@@ -13,7 +13,7 @@ export default function DailyDetailClient({ children }: { children: React.ReactN
         >
           ← Kembali ke Riwayat
         </Link>
-        <PDFExportButton targetId="daily-report-content" filename="daily-report" />
+        <PDFExportButton type="daily" data={data} filename="daily-report" />
       </div>
       {children}
     </div>

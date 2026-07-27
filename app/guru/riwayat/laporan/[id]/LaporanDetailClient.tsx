@@ -3,7 +3,7 @@
 import Link from "next/link";
 import PDFExportButton from "@/components/riwayat/PDFExportButton";
 
-export default function LaporanDetailClient({ children }: { children: React.ReactNode }) {
+export default function LaporanDetailClient({ children, data }: { children: React.ReactNode; data: any }) {
   return (
     <div className="p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
@@ -13,7 +13,7 @@ export default function LaporanDetailClient({ children }: { children: React.Reac
         >
           ← Kembali ke Riwayat
         </Link>
-        <PDFExportButton targetId="laporan-content" filename="laporan-triwulan" />
+        <PDFExportButton type="laporan" data={data} filename="laporan-triwulan" />
       </div>
       {children}
     </div>

@@ -39,7 +39,7 @@ export default async function PortoDetailPage({
   const fitrahMap = Object.fromEntries(FITRAH_LIST.map(f => [f.key, f]));
 
   return (
-    <PortoDetailClient>
+    <PortoDetailClient data={porto}>
       <div id="porto-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border sm:p-6 p-4 print:p-4">
         <div className="text-center border-b pb-4 mb-6">
           <h1 className="text-xl font-bold text-gray-800">Portofolio</h1>

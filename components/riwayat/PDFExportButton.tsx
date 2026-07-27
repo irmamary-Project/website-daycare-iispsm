@@ -1,12 +1,18 @@
 "use client";
 
 import { useRef } from "react";
+import { generateDailyReportPDF, generatePortfolioPDF, generateLaporanPDF } from "@/lib/pdf";
+import type { DailyReport, Portofolio, LaporanTriwulan } from "@/types";
+
+type ReportType = "daily" | "portofolio" | "laporan";
 
 export default function PDFExportButton({
-  targetId,
+  type,
+  data,
   filename,
 }: {
-  targetId: string;
+  type: ReportType;
+  data: any;
   filename: string;
 }) {
   const loadingRef = useRef(false);
@@ -15,41 +21,23 @@ export default function PDFExportButton({
     if (loadingRef.current) return;
     loadingRef.current = true;
 
-    const [jsPDF, html2canvas] = await Promise.all([
-      import("jspdf"),
-      import("html2canvas"),
-    ]);
-
-    const el = document.getElementById(targetId);
-    if (!el) return;
-
-    const canvas = await html2canvas.default(el, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: "#ffffff",
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF.default("p", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pdf.internal.pageSize.getHeight();
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pdf.internal.pageSize.getHeight();
+    try {
+      let doc;
+      switch (type) {
+        case "daily":
+          doc = await generateDailyReportPDF(data as DailyReport & { siswa?: { nama: string; kelas: string } });
+          break;
+        case "portofolio":
+          doc = await generatePortfolioPDF(data as Portofolio & { siswa?: { nama: string; kelas: string } });
+          break;
+        case "laporan":
+          doc = await generateLaporanPDF(data as LaporanTriwulan & { siswa?: { nama: string; kelas: string } });
+          break;
+      }
+      doc!.save(`${filename}.pdf`);
+    } finally {
+      loadingRef.current = false;
     }
-
-    pdf.save(`${filename}.pdf`);
-    loadingRef.current = false;
   }
 
   return (

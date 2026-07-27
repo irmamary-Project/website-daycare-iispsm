@@ -41,7 +41,7 @@ export default async function DailyDetailPage({
   const fitrahMap = Object.fromEntries(FITRAH_LIST.map(f => [f.key, f]));
 
   return (
-    <DailyDetailClient>
+    <DailyDetailClient data={report}>
       <div id="daily-report-content" className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border sm:p-6 p-4 print:p-4">
         <div className="text-center border-b pb-4 mb-6">
           <h1 className="text-xl font-bold text-gray-800">Daily Report</h1>
