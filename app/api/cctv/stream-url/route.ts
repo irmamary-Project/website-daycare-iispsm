@@ -70,12 +70,12 @@ export async function GET() {
     {
       id: "atas",
       name: "DayCare - Lantai Atas",
-      url: process.env.CCTV_STREAM_URL_1 ?? "",
+      url: process.env.CCTV_STREAM_URL_1 ? "/api/cctv/proxy?cam=atas" : "",
     },
     {
       id: "bawah",
       name: "DayCare - Lantai Bawah",
-      url: process.env.CCTV_STREAM_URL_2 ?? "",
+      url: process.env.CCTV_STREAM_URL_2 ? "/api/cctv/proxy?cam=bawah" : "",
     },
   ].filter((cam) => cam.url);
 
