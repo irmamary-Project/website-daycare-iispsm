@@ -183,8 +183,54 @@ export async function generatePortfolioPDF(porto: Portofolio & { siswa?: { nama:
   if (porto.portofolio_media && porto.portofolio_media.length > 0) {
     y = checkPageBreak(doc, y, 10);
     y = sectionDivider(doc, y);
-    const mediaNames = porto.portofolio_media.map(m => `   • ${m.nama_file ?? (m.tipe === "foto" ? "Foto" : "Video")}`).join("\n");
-    y = textBlock(doc, `Media (${porto.portofolio_media.length} file)`, mediaNames, y);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Media (${porto.portofolio_media.length} file):`, MARGIN_L, y);
+    y += 6;
+
+    const fotoItems = porto.portofolio_media.filter(m => m.tipe === "foto");
+    const videoItems = porto.portofolio_media.filter(m => m.tipe !== "foto");
+
+    const imgW = (CONTENT_W - 4) / 2;
+
+    for (const m of fotoItems) {
+      y = checkPageBreak(doc, y, imgW + 10);
+      try {
+        const resp = await fetch(m.url, { signal: AbortSignal.timeout(8000) });
+        const blob = await resp.blob();
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+        doc.addImage(base64, "JPEG", MARGIN_L, y, imgW, imgW);
+        if (m.nama_file) {
+          doc.setFontSize(8);
+          doc.setTextColor(120, 120, 120);
+          doc.text(m.nama_file, MARGIN_L, y + imgW + 4);
+        }
+        y += imgW + 8;
+      } catch {
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(150, 150, 150);
+        doc.text(`[Gagal memuat: ${m.nama_file ?? "Foto"}]`, MARGIN_L, y);
+        y += 6;
+      }
+    }
+
+    if (videoItems.length > 0) {
+      y = checkPageBreak(doc, y, 6 + videoItems.length * 5);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(120, 120, 120);
+      for (const m of videoItems) {
+        doc.text(`🎬 ${m.nama_file ?? "Video"}`, MARGIN_L, y);
+        y += 5;
+      }
+    }
   }
 
   y = checkPageBreak(doc, y, 15);

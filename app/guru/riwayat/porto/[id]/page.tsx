@@ -85,7 +85,6 @@ export default async function PortoDetailPage({
                       <img
                         src={m.url}
                         alt={m.nama_file ?? "Foto"}
-                        crossOrigin="anonymous"
                         className="w-full aspect-square object-cover"
                         loading="lazy"
                       />
