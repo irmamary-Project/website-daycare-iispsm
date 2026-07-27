@@ -1,6 +1,6 @@
 import type jsPDF from "jspdf";
 import type { DailyReport, Portofolio, LaporanTriwulan } from "@/types";
-import { FITRAH_LIST, CAPAIAN_OPTIONS, MOOD_OPTIONS } from "@/types";
+import { FITRAH_LIST, CAPAIAN_OPTIONS } from "@/types";
 
 const MONTHS = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const PAGE_W = 210;
@@ -98,7 +98,6 @@ export async function generateDailyReportPDF(report: DailyReport & { siswa?: { n
   const doc = new JsPdf("p", "mm", "a4");
   let y = 25;
 
-  const moodMap = Object.fromEntries(MOOD_OPTIONS.map(m => [m.value, m]));
   const fitrahMap = Object.fromEntries(FITRAH_LIST.map(f => [f.key, f]));
 
   y = header(doc, "Daily Report", "IIS PSM Daycare & Preschool Magetan",
@@ -107,8 +106,8 @@ export async function generateDailyReportPDF(report: DailyReport & { siswa?: { n
   const fields: [string, string][] = [
     ["Nama Siswa", report.siswa?.nama ?? "-"],
     ["Kehadiran", report.kehadiran],
-    ["Mood Datang", report.mood_datang ? `${moodMap[report.mood_datang]?.emoji ?? ""} ${report.mood_datang}` : "-"],
-    ["Mood Pulang", report.mood_pulang ? `${moodMap[report.mood_pulang]?.emoji ?? ""} ${report.mood_pulang}` : "-"],
+    ["Mood Datang", report.mood_datang ? report.mood_datang : "-"],
+    ["Mood Pulang", report.mood_pulang ? report.mood_pulang : "-"],
     ["Kondisi Kesehatan", report.kondisi_kesehatan ?? "-"],
     ["Suhu Tubuh", report.suhu_tubuh ? `${report.suhu_tubuh}°C` : "-"],
     ["Sarapan", report.sarapan ?? "-"],
@@ -122,7 +121,7 @@ export async function generateDailyReportPDF(report: DailyReport & { siswa?: { n
     ["BAB", report.bab ?? "-"],
     ["Ibadah & Aktivitas", report.ibadah_checklist?.length ? report.ibadah_checklist.join(", ") : "-"],
     ["Fitrah Distimulasi", report.fitrah_distimulasi?.length
-      ? report.fitrah_distimulasi.map((f: string) => `${fitrahMap[f]?.icon ?? ""} ${fitrahMap[f]?.label ?? f}`).join(", ")
+      ? report.fitrah_distimulasi.map((f: string) => `${fitrahMap[f]?.label ?? f}`).join(", ")
       : "-"],
   ];
 
@@ -166,7 +165,7 @@ export async function generatePortfolioPDF(porto: Portofolio & { siswa?: { nama:
 
   y = field(doc, "Nama Siswa", porto.siswa?.nama ?? "-", y);
   y = field(doc, "Fitrah Distimulasi", porto.fitrah?.length
-    ? porto.fitrah.map((f: string) => `${fitrahMap[f]?.icon ?? ""} ${fitrahMap[f]?.label ?? f}`).join(", ")
+    ? porto.fitrah.map((f: string) => `${fitrahMap[f]?.label ?? f}`).join(", ")
     : "-", y);
 
   if (porto.observasi) {
@@ -246,7 +245,7 @@ export async function generateLaporanPDF(laporan: LaporanTriwulan & { siswa?: { 
     const f = FITRAH_LIST.find(f => f.key === key);
 
     doc.setFont("helvetica", "bold");
-    doc.text(`${f?.icon ?? ""} ${f?.label ?? key}`, colX[0], y);
+    doc.text(f?.label ?? key, colX[0], y);
     doc.setFont("helvetica", "normal");
     doc.text(data?.capaian ? (capaianLabel[data.capaian] ?? data.capaian) : "-", colX[1], y);
 
