@@ -88,11 +88,11 @@ export default async function PortoDetailPage({
                             src={m.url}
                             alt={m.nama_file ?? "Foto"}
                             crossOrigin="anonymous"
-                            className="w-full h-40 object-cover"
+                            className="w-full h-72 object-cover"
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-40 flex items-center justify-center bg-gray-100 text-gray-400 text-sm">
+                          <div className="w-full h-72 flex items-center justify-center bg-gray-100 text-gray-400 text-sm">
                             🎬 {m.nama_file ?? "Video"}
                           </div>
                         )}

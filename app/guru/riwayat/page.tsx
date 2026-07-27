@@ -13,9 +13,9 @@ const DETAIL_LINKS: Record<string, (id: string) => string> = {
 export default async function RiwayatPage({
   searchParams,
 }: {
-  searchParams: Promise<{ start?: string; end?: string }>;
+  searchParams: Promise<{ start?: string; end?: string; siswa_id?: string }>;
 }) {
-  const { start, end } = await searchParams;
+  const { start, end, siswa_id } = await searchParams;
   const supabase = await createClient();
 
   const startDate = start && !isNaN(Date.parse(start)) ? start : undefined;
@@ -25,16 +25,18 @@ export default async function RiwayatPage({
     let query = q;
     if (startDate) query = query.gte(col, startDate);
     if (endDate) query = query.lte(col, `${endDate}T23:59:59.999Z`);
+    if (siswa_id) query = query.eq("siswa_id", siswa_id);
     return query;
   }
 
-  const [{ data: dailyReports }, { data: portofolios }, { data: laporans }] = await Promise.all([
+  const [{ data: dailyReports }, { data: portofolios }, { data: laporans }, { data: siswaList }] = await Promise.all([
     filterDate(supabase.from("daily_reports").select("*, siswa(nama)"), "created_at")
       .order("created_at", { ascending: false }).limit(50),
     filterDate(supabase.from("portofolio").select("*, siswa(nama), portofolio_media(id)"), "created_at")
       .order("created_at", { ascending: false }).limit(50),
     filterDate(supabase.from("laporan_triwulan").select("*, siswa(nama)"), "created_at")
       .order("created_at", { ascending: false }).limit(50),
+    supabase.from("siswa").select("id, nama").eq("status", "aktif").order("nama"),
   ]);
 
   // Merge and sort all
@@ -60,7 +62,12 @@ export default async function RiwayatPage({
       </div>
 
       <div className="mb-6 p-4 bg-white rounded-xl border shadow-sm">
-        <RiwayatFilter start={start ?? ""} end={end ?? ""} />
+        <RiwayatFilter
+          start={start ?? ""}
+          end={end ?? ""}
+          siswaId={siswa_id ?? ""}
+          siswaList={siswaList ?? []}
+        />
       </div>
 
       <div className="space-y-3">
@@ -99,7 +106,7 @@ export default async function RiwayatPage({
         {all.length === 0 && (
           <div className="card text-center py-16 text-gray-400">
             <div className="text-4xl mb-3">📭</div>
-            <p>Belum ada laporan atau portofolio{startDate || endDate ? " dengan filter tersebut" : ""}.</p>
+            <p>Belum ada laporan atau portofolio{startDate || endDate || siswa_id ? " dengan filter tersebut" : ""}.</p>
           </div>
         )}
       </div>
