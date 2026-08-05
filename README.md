@@ -1,116 +1,11 @@
 # IIS PSM Daycare — Portal Guru & Orang Tua
 
 Aplikasi web fullstack untuk manajemen daycare:
-- **Portal Guru** — input daily report, portofolio, laporan triwulan, data siswa, pengumuman
-- **Portal Orang Tua** — lihat perkembangan anak, portofolio, laporan, notifikasi
+- **Portal Guru** — input daily report, portofolio, laporan triwulan, data siswa, pengumuman, absensi
+- **Portal Orang Tua** — lihat perkembangan anak, portofolio, laporan, notifikasi, video CCTV
+- **Admin** — persetujuan pendaftaran, rekap & geofence absensi, data siswa
 
-**Stack:** Next.js 15 · Supabase (Auth + DB + Storage) · Tailwind CSS · Vercel
-
----
-
-## 🚀 PANDUAN DEPLOY LENGKAP
-
-### LANGKAH 1 — Setup Supabase
-
-1. Buka **https://supabase.com** → klik **"Start your project"**
-2. Login dengan GitHub, lalu klik **"New project"**
-3. Isi:
-   - **Name:** `iis-psm-daycare`
-   - **Database Password:** buat password kuat (simpan!)
-   - **Region:** `Southeast Asia (Singapore)`
-4. Tunggu ~2 menit sampai project siap
-
-**Jalankan Schema SQL:**
-1. Di sidebar Supabase → klik **SQL Editor** → **"New query"**
-2. Copy seluruh isi file `supabase/schema.sql`
-3. Paste ke SQL Editor → klik **"Run"**
-4. Pastikan muncul "Success" tanpa error
-
-**Buat Storage Bucket:**
-1. Di sidebar → **Storage** → **"New bucket"**
-2. Name: `portofolio`, centang **Public bucket: OFF** (private)
-3. Klik **Create bucket**
-
-**Ambil API Keys:**
-1. Sidebar → **Settings** → **API**
-2. Copy:
-   - `Project URL` → untuk `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` key → untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-**Setup Email (untuk verifikasi akun):**
-1. Sidebar → **Authentication** → **URL Configuration**
-2. **Site URL:** `https://nama-project-anda.vercel.app`
-3. **Redirect URLs:** tambahkan `https://nama-project-anda.vercel.app/auth/callback`
-
----
-
-### LANGKAH 2 — Setup Project Lokal
-
-```bash
-# Clone / download project ini
-cd iis-psm-daycare
-
-# Install dependencies
-npm install
-
-# Buat file .env.local
-cp .env.example .env.local
-```
----
-
-### LANGKAH 3 — Buat Akun Guru Pertama
-
-1. Buka `http://localhost:3000` → klik **Daftar**
-2. Pilih role **Guru**, isi nama & email → klik **Daftar**
-3. Cek email → klik link verifikasi
-4. **Promosikan ke role guru** di Supabase:
-   - Supabase → **Table Editor** → tabel `profiles`
-   - Cari row dengan email Anda
-   - Ubah kolom `role` dari `ortu` ke `guru`
-   - Klik **Save**
-5. Login kembali → akan masuk ke Portal Guru
-
-> **Tip:** Untuk akun guru selanjutnya, minta mereka daftar dulu lalu update role di Supabase.
-
----
-
-### LANGKAH 4 — Deploy ke Vercel
-
-**A. Push ke GitHub:**
-```bash
-git init
-git add .
-git commit -m "Initial commit — IIS PSM Portal"
-
-# Buat repo baru di github.com lalu:
-git remote add origin https://github.com/username/iis-psm-daycare.git
-git push -u origin main
-```
-
-**B. Deploy di Vercel:**
-1. Buka **https://vercel.com** → login dengan GitHub
-2. Klik **"Add New Project"** → pilih repo `iis-psm-daycare`
-3. Framework: **Next.js** (auto-detected)
-4. **Environment Variables** — tambahkan:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL     = https://xxxxxx.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJ...
-   ```
-5. Klik **Deploy** → tunggu ~2 menit
-
-**C. Update Supabase dengan URL Vercel:**
-1. Setelah deploy, copy URL Vercel: `https://iis-psm-daycare-xxx.vercel.app`
-2. Supabase → **Authentication** → **URL Configuration**
-3. Update **Site URL** dan **Redirect URLs** dengan URL Vercel tersebut
-
----
-
-### LANGKAH 5 — Tambah Orang Tua & Hubungkan ke Siswa
-
-1. Minta orang tua daftar di portal → pilih role **Orang Tua**
-2. Guru masuk ke **Data Siswa** → tambah/edit siswa
-3. Di field **Orang Tua / Wali** → pilih nama orang tua yang sudah daftar
-4. Orang tua sekarang bisa lihat data anaknya di portal mereka
+**Stack:** Next.js 16 (App Router, React 19) · Supabase (Auth + DB + Storage + RLS) · Tailwind CSS · Vercel
 
 ---
 
@@ -119,72 +14,129 @@ git push -u origin main
 ```
 iis-psm-daycare/
 ├── app/
-│   ├── login/              # Halaman login & register
-│   ├── auth/callback/      # Handler email verification
-│   ├── guru/               # Portal Guru (protected)
-│   │   ├── dashboard/      # Ringkasan harian
-│   │   ├── data-siswa/     # CRUD data siswa
-│   │   ├── daily-report/   # Input laporan harian
-│   │   ├── portofolio/     # Upload foto/video
-│   │   ├── laporan/        # Laporan triwulan
-│   │   ├── riwayat/        # History semua laporan
-│   │   └── pengumuman/     # Broadcast ke orang tua
-│   └── ortu/               # Portal Orang Tua (protected)
-│       ├── dashboard/      # Beranda & ringkasan anak
-│       ├── portofolio/     # Lihat foto/video & daily report
-│       ├── laporan/        # Lihat laporan triwulan
-│       └── notifikasi/     # Notifikasi dari guru
+│   ├── api/                 # REST API routes (server-side auth guard)
+│   │   ├── absensi/          # check-in, check-out, geofence, rekap, riwayat
+│   │   ├── siswa/            # CRUD, export CSV, import CSV
+│   │   └── cctv/stream-url/  # HLS stream URL (server-only env)
+│   ├── login/                # Login & reset password
+│   ├── auth/callback/        # Email verifikasi
+│   ├── admission/            # Form pendaftaran (public)
+│   ├── guru/                 # Portal Guru (role: guru & admin)
+│   │   ├── dashboard/        # Ringkasan harian
+│   │   ├── absensi/          # check-in/out, rekap (admin), geofence (admin), riwayat
+│   │   ├── data-siswa/       # CRUD data siswa (admin)
+│   │   ├── admission/        # Persetujuan pendaftaran (admin)
+│   │   ├── daily-report/     # Input laporan harian
+│   │   ├── portofolio/       # Upload foto/video
+│   │   ├── laporan/          # Laporan triwulan
+│   │   ├── skrining/         # Skrining KPSP
+│   │   ├── pengumuman/       # Broadcast ke orang tua
+│   │   └── riwayat/          # History + detail & export PDF
+│   ├── ortu/                 # Portal Orang Tua
+│   │   ├── dashboard/        # Ringkasan anak
+│   │   ├── portofolio/       # Foto/video & daily report anak
+│   │   ├── laporan/          # Laporan triwulan anak
+│   │   └── notifikasi/       # Dari guru
+│   └── cctv/                 # Live CCTV (semua role)
 ├── components/
-│   ├── guru/SidebarClient  # Navigasi guru
-│   └── ortu/SidebarClient  # Navigasi orang tua
-├── lib/supabase/
-│   ├── client.ts           # Supabase browser client
-│   └── server.ts           # Supabase server client
-├── types/index.ts          # TypeScript types & constants
-├── middleware.ts            # Auth routing & role guard
-├── supabase/schema.sql     # Database schema lengkap
-└── .env.example            # Template environment variables
+│   ├── guru/SidebarClient.tsx
+│   ├── ortu/SidebarClient.tsx
+│   └── cctv/LiveCCTVClient.tsx
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts        # browser client (createBrowserClient)
+│   │   └── server.ts        # server client (createServerClient + cookies)
+│   ├── auth.ts              # guard API: getUser/requireAdmin/requireRole/withApi
+│   ├── geo.ts               # haversine + geofence config helper
+│   ├── csv.ts               # CSV parse/escape
+│   ├── pdf.ts               # generasi PDF (laporan, portofolio, absensi, skrining)
+│   ├── constants.ts         # URL storage, daftar kelas/fitrah/mood/status
+│   └── date.ts              # util waktu WIB
+├── types/index.ts           # tipe/shared type seluruh app
+├── middleware.ts             # proteksi rute + redirect role
+├── styles/                   # tema & CSS landing page
+├── supabase/
+│   ├── schema.sql           # canonical schema (idempotent snapshot)
+│   ├── migrations/          # migration SQL perubahan berurutan
+│   └── README.md           # alur kerja & cara apply migration
+└── next.config.ts
 ```
 
 ---
 
-## 🔐 Sistem Keamanan (Row Level Security)
+## 🔐 Arsitektur Keamanan (penting untuk kontributor)
 
-Semua data dilindungi di level database:
+- **Anon key Supabase itu publik.** Keamanan data **harus** dijaga di level **Row Level Security (RLS)** di Supabase, bukan di kode.
+- Klien Supabase dibagi dua:
+  - `createBrowserClient` (lib/supabase/client) — dipakai komponen client.
+  - `createServerClient` (lib/supabase/server) — dipakai server component & API route.
+- **Semua endpoint `/api/*` mem-verifikasi sesi & role di server** memakai helper di `lib/auth.ts`:
+  - `getUser()` → 401 bila belum login.
+  - `requireAdmin()` / `requireRole(...)` → 403 bila role tidak sesuai.
+  - `withApi(handler)` — bungkus handler agar `ApiError` diubah jadi respons JSON yang rapi.
+- `/api/*` **tidak** dilindungi middleware (lihat `middleware.ts`), jadi setiap route harus guard sendiri (defense in depth).
+- Selalu cek `supabase/schema.sql` sebagai sumber kebenaran tabel & policy. Jangan mengubah DB langsung tanpa migration.
+
+---
+
+## 🚀 Setup & Deploy
+
+### 1. Setup Supabase
+1. Buat project di supabase.com (region Singapore).
+2. Jalankan seluruh isi `supabase/schema.sql` di **SQL Editor** (pastikan sukses tanpa error).
+3. Buat bucket storage `portofolio` (Public: **OFF** / private).
+4. Ambil `Project URL` dan `anon public` key → disimpan di env.
+
+### 2. Setup Lokal
+```bash
+cp .env.local.example .env.local   # isi semua variabel
+npm install
+npm run dev                        # buka http://localhost:3000
+```
+
+### 3. Deploy ke Vercel
+1. Hubungkan repo ke Vercel → framework **Next.js** (auto).
+2. Isi env (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, dan variabel CCTV/`NEXT_PUBLIC_*` lain jika ada).
+3. **Update Supabase Auth URL config** dengan URL Vercel: di sidebar → Authentication → URL Configuration.
+
+### 4. Perubahan Database
+- Buat file baru di `supabase/migrations/`, lalu apply ke dashboard → SQL Editor (atau `supabase db push`).
+- Lihat `supabase/README.md` untuk alur lengkap & aturan idempotency.
+
+---
+
+## 🔐 RLS (Ringkasan)
+Semua data dilindungi di level database. Lihat `supabase/schema.sql` untuk detail policy.
 
 | Data | Guru | Orang Tua |
 |------|------|-----------|
-| Data Siswa | ✅ Full CRUD | 👁️ Hanya anak sendiri |
-| Daily Report | ✅ Full CRUD | 👁️ Hanya yang terkirim |
-| Portofolio | ✅ Full CRUD | 👁️ Hanya yang terkirim |
-| Laporan Triwulan | ✅ Full CRUD | 👁️ Hanya yang terkirim |
-| Pengumuman | ✅ Full CRUD | 👁️ Baca saja |
+| Data Siswa | ✅ (admin yang kelola) | 👁️ Hanya anak sendiri |
+| Daily Report | ✅ | 👁️ Hanya yang terkirim |
+| Portofolio | ✅ | 👁️ Hanya yang terkirim |
+| Laporan Triwulan | ✅ | 👁️ Hanya yang terkirim |
+| Pengumuman | ✅ | 👁️ Baca saja |
 | Notifikasi | – | ✅ Hanya milik sendiri |
 
 ---
 
-## 🛠️ Troubleshooting
+## Scripts
+```bash
+npm run dev      # development
+npm run build    # production build
+npm run start    # start production
+npm run lint     # ESLint
+```
 
-**Error: `relation "profiles" does not exist`**
-→ Schema SQL belum dijalankan. Ulangi Langkah 1 bagian "Jalankan Schema SQL".
-
-**Orang tua login tapi tidak ada data anak:**
-→ Hubungkan akun orang tua ke data siswa via Data Siswa di portal guru.
-
-**Email verifikasi tidak masuk:**
-→ Cek folder Spam. Atau di Supabase → Authentication → Settings → matikan "Enable email confirmations" untuk testing.
-
-**Upload foto gagal:**
-→ Pastikan bucket `portofolio` sudah dibuat di Supabase Storage.
-
-**Deploy Vercel error `NEXT_PUBLIC_SUPABASE_URL is not defined`:**
-→ Pastikan environment variables sudah diisi di Vercel dashboard sebelum deploy.
+## Troubleshooting ringkas
+- **`relation "profiles" does not exist`** → belum menjalankan `supabase/schema.sql`.
+- **Ortu login tapi tidak ada data anak** → hubungkan akun via Data Siswa di portal guru.
+- **Upload foto gagal** → pastikan bucket `portofolio` sudah dibuat.
+- **Deploy error env** → pastikan semua `NEXT_PUBLIC_*` sudah di isi di Vercel.
 
 ---
 
-## 📞 Fitur Mendatang (Roadmap)
-
-- [ ] Export laporan ke PDF
+## Roadmap
+- [x] Export laporan ke PDF
 - [ ] Notifikasi WhatsApp via Fonnte/WA API
 - [ ] Galeri portofolio dengan filter per bulan
 - [ ] Grafik tren perkembangan fitrah
