@@ -4,21 +4,8 @@ import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { todayWIB } from "@/lib/date";
-import { generateAbsensiRekapPDF, type AbsensiRekapRecord } from "@/lib/pdf";
-
-interface GuruAbsensi {
-  guru_id: string;
-  full_name: string;
-  check_in: string | null;
-  check_out: string | null;
-  status: string;
-  keterangan: string | null;
-}
-
-interface GuruProfile {
-  id: string;
-  full_name: string;
-}
+import { generateAbsensiRekapPDF } from "@/lib/pdf";
+import { type AbsensiRekapRecord, type GuruAbsensi, type GuruProfile } from "@/types";
 
 export default function AdminAbsensiPage() {
   const supabase = createClient();

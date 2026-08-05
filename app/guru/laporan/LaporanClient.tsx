@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { FITRAH_LIST, CAPAIAN_OPTIONS, FitrahPenilaian, CapaianType, type Siswa, type LaporanTriwulan } from "@/types";
+import { FITRAH_LIST, CAPAIAN_OPTIONS } from "@/lib/constants";
+import { FitrahPenilaian, CapaianType, type Siswa, type LaporanTriwulan } from "@/types";
 
 const currentYear = new Date().getFullYear();
 const PERIODES = ["Q1", "Q2", "Q3", "Q4"].map(q => `${q}-${currentYear}`);

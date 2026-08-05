@@ -135,36 +135,82 @@ export interface Notifikasi {
   created_at: string;
 }
 
-export const FITRAH_LIST = [
-  { key: "keimanan",    label: "Keimanan",    icon: "🕌" },
-  { key: "belajar",     label: "Belajar",     icon: "🧠" },
-  { key: "bakat",       label: "Bakat",       icon: "⭐" },
-  { key: "seksualitas", label: "Seksualitas", icon: "❤️" },
-  { key: "jasmani",     label: "Jasmani",     icon: "💪" },
-  { key: "bahasa",      label: "Bahasa",      icon: "🌿" },
-  { key: "sosialitas",  label: "Sosialitas",  icon: "🤝" },
-  { key: "adab",        label: "Adab",        icon: "✨" },
-] as const;
+export interface GeofenceConfig {
+  id?: string;
+  latitude: number;
+  longitude: number;
+  radius_meter: number;
+  nama_lokasi?: string;
+}
 
-export const KELAS_LIST = [
-  "Infant 1 (3-6 bulan)",
-  "Infant 2 (6-12 Bulan)",
-  "Toddler (1-3 Tahun)",
-"KB/Preschool 1 (4 tahun)",
-"TK A/Preschool 1 (5 Tahun)",
-"TK B/Preschool 2 (6 Tahun)",
-];
+export interface Screening {
+  id: string;
+  siswa_id: string;
+  usia_bulan: number;
+  kelompok_usia: string;
+  tanggal_skrining: string;
+  skor_ya: number;
+  skor_tidak: number;
+  kode_interpretasi: string;
+  interpretasi: string;
+  jawaban: Record<string, string>;
+  catatan_per_soal: Record<string, string>;
+  catatan_umum: string;
+  created_at: string;
+  siswa?: { nama: string; kelas: string; tanggal_lahir: string } | null;
+}
 
-export const CAPAIAN_OPTIONS: { value: CapaianType; label: string; color: string }[] = [
-  { value: "BSB", label: "Berkembang Sangat Baik (BSB)", color: "text-green-600" },
-  { value: "BSH", label: "Berkembang Sesuai Harapan (BSH)", color: "text-blue-600" },
-  { value: "MB",  label: "Mulai Berkembang (MB)",          color: "text-yellow-600" },
-  { value: "BB",  label: "Belum Berkembang (BB)",           color: "text-red-600" },
-];
+export interface AbsensiRekapRecord {
+  guru_id: string;
+  tanggal: string;
+  status: string;
+  check_in: string | null;
+  check_out: string | null;
+  keterangan: string | null;
+  guru_name: string;
+}
 
-export const MOOD_OPTIONS = [
-  { value: "senang", emoji: "😊", label: "Senang" },
-  { value: "biasa",  emoji: "😐", label: "Biasa" },
-  { value: "sedih",  emoji: "😢", label: "Sedih" },
-  { value: "marah",  emoji: "😤", label: "Marah" },
-] as const;
+export interface GuruAbsensi {
+  guru_id: string;
+  full_name: string;
+  check_in: string | null;
+  check_out: string | null;
+  status: string;
+  keterangan: string | null;
+}
+
+export interface GuruProfile {
+  id: string;
+  full_name: string;
+}
+
+export interface AbsensiRecord {
+  id: string;
+  tanggal: string;
+  check_in: string | null;
+  check_out: string | null;
+  status: string;
+  keterangan: string | null;
+  profiles: { full_name: string } | null;
+}
+
+export type AdmissionSiswa = Siswa & {
+  profiles?: { full_name: string | null; email: string | null; phone: string | null } | null;
+};
+
+export type SiswaExport = Siswa & {
+  ortu?: { full_name: string | null; phone: string | null } | null;
+};
+
+export interface KPSPQuestion {
+  id: number;
+  text: string;
+  category: string;
+}
+
+export interface KPSPAgeGroup {
+  months: number;
+  label: string;
+  tools: string;
+  questions: KPSPQuestion[];
+}

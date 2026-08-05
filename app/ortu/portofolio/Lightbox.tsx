@@ -1,14 +1,9 @@
 "use client";
 import Image from "next/image";
 import { useState, useCallback } from "react";
+import { type PortofolioMedia } from "@/types";
 
-interface MediaItem {
-  id: string;
-  url: string;
-  tipe: "foto" | "video";
-}
-
-export default function PortfolioMedia({ media }: { media: MediaItem[] }) {
+export default function PortfolioMedia({ media }: { media: PortofolioMedia[] }) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const close = useCallback(() => setExpanded(null), []);

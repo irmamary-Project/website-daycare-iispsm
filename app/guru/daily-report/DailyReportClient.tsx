@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { MOOD_OPTIONS, FITRAH_LIST, type Siswa } from "@/types";
+import { MOOD_OPTIONS, FITRAH_LIST } from "@/lib/constants";
+import { type Siswa } from "@/types";
 import { todayWIB } from "@/lib/date";
 
 const IBADAH_LIST = [

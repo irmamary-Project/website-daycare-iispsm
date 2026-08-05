@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { FITRAH_LIST, type PortofolioMedia } from "@/types";
+import { FITRAH_LIST } from "@/lib/constants";
+import { type PortofolioMedia } from "@/types";
 import Link from "next/link";
 import PortoDetailClient from "./PortoDetailClient";
 

@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin, withApi, apiError } from "@/lib/auth";
 import { escapeCsv } from "@/lib/csv";
-import type { Siswa } from "@/types";
-
-type SiswaExport = Siswa & {
-  ortu?: { full_name: string | null; phone: string | null } | null;
-};
+import { type SiswaExport } from "@/types";
 
 export const GET = withApi(async () => {
   const { supabase } = await requireAdmin();

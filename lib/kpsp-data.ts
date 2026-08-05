@@ -1,15 +1,6 @@
-export interface KPSPQuestion {
-  id: number;
-  text: string;
-  category: string;
-}
+import type { KPSPQuestion, KPSPAgeGroup } from "@/types";
 
-export interface KPSPAgeGroup {
-  months: number;
-  label: string;
-  tools: string;
-  questions: KPSPQuestion[];
-}
+export type { KPSPQuestion, KPSPAgeGroup };
 
 export const KPSP_DATA: KPSPAgeGroup[] = [
   {

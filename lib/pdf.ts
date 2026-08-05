@@ -1,7 +1,7 @@
 import type jsPDF from "jspdf";
-import type { DailyReport, Portofolio, LaporanTriwulan } from "@/types";
-import { FITRAH_LIST, CAPAIAN_OPTIONS } from "@/types";
-import { KPSP_DATA } from "@/app/guru/skrining/kpsp-data";
+import type { DailyReport, Portofolio, LaporanTriwulan, AbsensiRekapRecord, Screening } from "@/types";
+import { FITRAH_LIST, CAPAIAN_OPTIONS } from "@/lib/constants";
+import { KPSP_DATA } from "@/lib/kpsp-data";
 
 const MONTHS = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const PAGE_W = 210;
@@ -322,16 +322,6 @@ function drawTable(
   return y + 3;
 }
 
-export interface AbsensiRekapRecord {
-  guru_id: string;
-  tanggal: string;
-  status: string;
-  check_in: string | null;
-  check_out: string | null;
-  keterangan: string | null;
-  guru_name: string;
-}
-
 export async function generateAbsensiRekapPDF(params: {
   startDate: string;
   endDate: string;
@@ -492,40 +482,19 @@ export async function generateLaporanPDF(laporan: LaporanTriwulan & { siswa?: { 
   return doc;
 }
 
-export interface SkriningRecord {
-  id: string;
-  usia_bulan: number;
-  kelompok_usia: string;
-  tanggal_skrining: string;
-  skor_ya: number;
-  skor_tidak: number;
-  kode_interpretasi: string;
-  interpretasi: string;
-  jawaban: Record<string, string>;
-  catatan_per_soal: Record<string, string>;
-  catatan_umum: string;
-  siswa?: {
-    nama: string;
-    kelas: string;
-    tanggal_lahir: string;
-  } | null;
-}
-
 const SKRINING_DESC: Record<string, string> = {
   S: "Perkembangan anak sesuai dengan usianya.",
   M: "Perkembangan anak perlu dipantau lebih lanjut. Disarankan pemeriksaan ulang dalam 1-2 bulan.",
   P: "Perkembangan anak terdapat penyimpangan. Segera rujuk ke fasilitas kesehatan untuk pemeriksaan lebih lanjut.",
 };
 
-export async function generateSkriningPDF(sk: SkriningRecord) {
+export async function generateSkriningPDF(sk: Screening) {
   const JsPdf = await getDoc();
   const doc = new JsPdf("p", "mm", "a4");
   let y = 25;
 
   y = header(doc, "Hasil Skrining Perkembangan (KPSP)", "IIS PSM Daycare & Preschool Magetan",
     `Kelompok Usia ${sk.kelompok_usia} · ${fmtDate(sk.tanggal_skrining)}`, y);
-
-  y = field(doc, "Nama Anak", sk.siswa?.nama ?? "-", y);
   if (sk.siswa?.tanggal_lahir) y = field(doc, "Tanggal Lahir", fmtDate(sk.siswa.tanggal_lahir), y);
   y = field(doc, "Usia", `${sk.usia_bulan} bulan`, y);
   y = field(doc, "Kelas", sk.siswa?.kelas ?? "-", y);

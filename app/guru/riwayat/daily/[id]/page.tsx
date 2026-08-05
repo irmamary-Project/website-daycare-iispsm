@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { FITRAH_LIST, MOOD_OPTIONS } from "@/types";
+import { FITRAH_LIST, MOOD_OPTIONS } from "@/lib/constants";
 import Link from "next/link";
 import DailyDetailClient from "./DailyDetailClient";
 

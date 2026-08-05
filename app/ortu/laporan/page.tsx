@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { FITRAH_LIST, LaporanTriwulan } from "@/types";
+import { FITRAH_LIST } from "@/lib/constants";
+import { LaporanTriwulan } from "@/types";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import PDFExportButton from "@/components/riwayat/PDFExportButton";

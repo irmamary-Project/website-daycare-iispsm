@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { LOGO_URL } from "@/lib/constants";
 import Link from "next/link";
 import Image from "next/image";
-import { KELAS_LIST } from "@/types";
+import { KELAS_LIST } from "@/lib/constants";
 
 const STEPS = ["Data Orang Tua", "Data Anak", "Konfirmasi"];
 

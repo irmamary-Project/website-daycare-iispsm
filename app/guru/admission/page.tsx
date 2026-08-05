@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import AdmissionApprovalClient, { type AdmissionSiswa } from "./AdmissionApprovalClient";
+import AdmissionApprovalClient from "./AdmissionApprovalClient";
+import { type AdmissionSiswa } from "@/types";
 
 export default async function AdminAdmissionPage() {
   const supabase = await createClient();

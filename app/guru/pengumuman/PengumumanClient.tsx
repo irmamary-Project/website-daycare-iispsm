@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Pengumuman, KELAS_LIST } from "@/types";
+import { KELAS_LIST } from "@/lib/constants";
+import { Pengumuman } from "@/types";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 

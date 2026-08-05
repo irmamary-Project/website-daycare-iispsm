@@ -4,13 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { todayWIB } from "@/lib/date";
-
-interface GeofenceConfig {
-  latitude: number;
-  longitude: number;
-  radius_meter: number;
-  nama_lokasi: string;
-}
+import { type GeofenceConfig } from "@/types";
 
 interface AbsensiHariIni {
   id: string;

@@ -1,14 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-
-interface GeofenceConfig {
-  id: string;
-  nama_lokasi: string;
-  latitude: number;
-  longitude: number;
-  radius_meter: number;
-}
+import { type GeofenceConfig } from "@/types";
 
 export default function GeofencePage() {
   const supabase = createClient();

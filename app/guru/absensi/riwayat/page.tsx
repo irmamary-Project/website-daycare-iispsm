@@ -3,16 +3,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-
-interface AbsensiRecord {
-  id: string;
-  tanggal: string;
-  check_in: string | null;
-  check_out: string | null;
-  status: string;
-  keterangan: string | null;
-  profiles: { full_name: string } | null;
-}
+import { type AbsensiRecord } from "@/types";
 
 export default function AbsensiRiwayatPage() {
   const supabase = createClient();

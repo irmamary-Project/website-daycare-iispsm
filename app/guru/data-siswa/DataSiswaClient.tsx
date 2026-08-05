@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Siswa, Profile, KELAS_LIST } from "@/types";
+import { KELAS_LIST } from "@/lib/constants";
+import { Siswa, Profile } from "@/types";
 import { generateDataSiswaPDF } from "@/lib/pdf";
 
 interface Props {

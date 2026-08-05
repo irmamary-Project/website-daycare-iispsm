@@ -3,27 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { generateSkriningPDF } from "@/lib/pdf";
-
-interface Screening {
-  id: string;
-  siswa_id: string;
-  usia_bulan: number;
-  kelompok_usia: string;
-  tanggal_skrining: string;
-  skor_ya: number;
-  skor_tidak: number;
-  kode_interpretasi: string;
-  interpretasi: string;
-  jawaban: Record<string, string>;
-  catatan_per_soal: Record<string, string>;
-  catatan_umum: string;
-  created_at: string;
-  siswa: {
-    nama: string;
-    kelas: string;
-    tanggal_lahir: string;
-  } | null;
-}
+import { type Screening } from "@/types";
 
 const interpretationStyles: Record<string, { bg: string; text: string; border: string }> = {
   S: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },

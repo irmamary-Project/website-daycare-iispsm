@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { FITRAH_LIST, DailyReport, Portofolio } from "@/types";
+import { FITRAH_LIST } from "@/lib/constants";
+import { DailyReport, Portofolio } from "@/types";
 import PortfolioMedia from "./Lightbox";
 import PDFExportButton from "@/components/riwayat/PDFExportButton";
 

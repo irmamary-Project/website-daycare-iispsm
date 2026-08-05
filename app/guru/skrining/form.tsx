@@ -3,19 +3,14 @@
 import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { KPSP_DATA, getInterpretation, type KPSPAgeGroup } from "./kpsp-data";
+import { KPSP_DATA, getInterpretation } from "@/lib/kpsp-data";
+import { type KPSPAgeGroup, type Siswa } from "@/types";
 import { todayWIB } from "@/lib/date";
 
 type Answers = Record<string, "ya" | "tidak" | null>;
 type Notes = Record<string, string>;
 
-interface Siswa {
-  id: string;
-  nama: string;
-  jenis_kelamin: string;
-  tanggal_lahir: string;
-  kelas: string;
-}
+type SiswaListItem = Pick<Siswa, "id" | "nama" | "jenis_kelamin" | "tanggal_lahir" | "kelas">;
 
 function calculateAge(birthDate: string, screeningDate: string): number | null {
   if (!birthDate || !screeningDate) return null;
@@ -46,7 +41,7 @@ const categoryColors: Record<string, string> = {
   "Sosialisasi &Kemandirian": "bg-orange-100 text-orange-700",
 };
 
-export default function SkriningForm({ siswaList }: { siswaList: Siswa[] }) {
+export default function SkriningForm({ siswaList }: { siswaList: SiswaListItem[] }) {
   const [selectedSiswaId, setSelectedSiswaId] = useState("");
   const [childName, setChildName] = useState("");
   const [birthDate, setBirthDate] = useState("");

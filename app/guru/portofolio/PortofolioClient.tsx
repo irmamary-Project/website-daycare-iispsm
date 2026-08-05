@@ -1,7 +1,8 @@
 "use client";
 import { useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { FITRAH_LIST, type Siswa } from "@/types";
+import { FITRAH_LIST } from "@/lib/constants";
+import { type Siswa } from "@/types";
 import { todayWIB } from "@/lib/date";
 
 export default function PortofolioClient({ siswaList, guruId }: { siswaList: Pick<Siswa, "id" | "nama" | "kelas">[]; guruId: string }) {
