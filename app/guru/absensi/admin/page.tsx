@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { todayWIB } from "@/lib/date";
+import { generateAbsensiRekapPDF } from "@/lib/pdf";
 
 interface GuruAbsensi {
   guru_id: string;
@@ -31,6 +32,12 @@ export default function AdminAbsensiPage() {
   const [formKeterangan, setFormKeterangan] = useState("");
   const [formLoading, setFormLoading] = useState(false);
   const [msg, setMsg] = useState("");
+
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportStart, setExportStart] = useState(() => todayWIB());
+  const [exportEnd, setExportEnd] = useState(() => todayWIB());
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportMsg, setExportMsg] = useState("");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -108,6 +115,53 @@ export default function AdminAbsensiPage() {
     }
   }
 
+  async function handleExportPDF() {
+    if (!exportStart || !exportEnd) return;
+    if (exportEnd < exportStart) {
+      setExportMsg("Tanggal selesai tidak boleh lebih awal dari tanggal mulai");
+      return;
+    }
+    setExportLoading(true);
+    setExportMsg("");
+
+    try {
+      const { data: gurus } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("role", "guru");
+
+      const { data: absenData } = await supabase
+        .from("absensi_guru")
+        .select("guru_id, tanggal, status, check_in, check_out, keterangan, profiles:guru_id(full_name)")
+        .gte("tanggal", exportStart)
+        .lte("tanggal", exportEnd);
+
+      const records = (absenData ?? []).map((r: any) => ({
+        guru_id: r.guru_id,
+        tanggal: r.tanggal,
+        status: r.status,
+        check_in: r.check_in,
+        check_out: r.check_out,
+        keterangan: r.keterangan,
+        guru_name: r.profiles?.full_name ?? "-",
+      }));
+
+      const doc = await generateAbsensiRekapPDF({
+        startDate: exportStart,
+        endDate: exportEnd,
+        guruList: gurus ?? [],
+        records,
+      });
+
+      doc.save(`rekap-absensi_${exportStart}_${exportEnd}.pdf`);
+      setExportOpen(false);
+    } catch {
+      setExportMsg("Gagal membuat PDF");
+    } finally {
+      setExportLoading(false);
+    }
+  }
+
   const rekap = {
     hadir: records.filter((r) => r.status === "Hadir").length,
     izin: records.filter((r) => r.status === "Izin").length,
@@ -132,6 +186,9 @@ export default function AdminAbsensiPage() {
           />
           <button onClick={() => setShowModal(true)} className="btn-primary">
             + Input Manual
+          </button>
+          <button onClick={() => setExportOpen(true)} className="btn-primary">
+            📄 Export PDF
           </button>
         </div>
       </div>
@@ -268,6 +325,55 @@ export default function AdminAbsensiPage() {
                 className="btn-primary flex-1"
               >
                 {formLoading ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Export PDF */}
+      {exportOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <h3 className="font-serif text-lg font-bold text-[var(--primary)] mb-1">Export Rekap PDF</h3>
+            <p className="text-xs text-gray-500 mb-4">Pilih rentang tanggal untuk rekap. Tabel di halaman tidak berubah.</p>
+
+            {exportMsg && (
+              <div className={`mb-3 p-3 rounded-xl text-sm ${exportMsg.includes("tidak boleh") || exportMsg.includes("Gagal") ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"}`}>
+                {exportMsg}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="label">Dari Tanggal</label>
+                <input
+                  type="date"
+                  value={exportStart}
+                  onChange={(e) => setExportStart(e.target.value)}
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="label">Sampai Tanggal</label>
+                <input
+                  type="date"
+                  value={exportEnd}
+                  onChange={(e) => setExportEnd(e.target.value)}
+                  className="input"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button onClick={() => setExportOpen(false)} className="btn-outline flex-1">Batal</button>
+              <button
+                onClick={handleExportPDF}
+                disabled={exportLoading || !exportStart || !exportEnd}
+                className="btn-primary flex-1"
+              >
+                {exportLoading ? "Membuat PDF..." : "Export"}
               </button>
             </div>
           </div>

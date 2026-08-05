@@ -244,6 +244,172 @@ export async function generatePortfolioPDF(porto: Portofolio & { siswa?: { nama:
   return doc;
 }
 
+function fmtTime(iso: string | null): string {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+}
+
+function fmtDateShort(d: string): string {
+  const date = new Date(d);
+  return `${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)}`;
+}
+
+function drawTable(
+  doc: jsPDF,
+  headers: string[],
+  colWidths: number[],
+  rows: string[][],
+  startY: number
+): number {
+  const tableW = colWidths.reduce((a, b) => a + b, 0);
+  const cellPad = 1.5;
+  const lineH = 4.3;
+  const headerH = 8;
+
+  let y = startY;
+
+  const drawHeader = () => {
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(60, 60, 60);
+    doc.setFillColor(235, 235, 235);
+    doc.rect(MARGIN_L, y, tableW, headerH, "F");
+    doc.setDrawColor(180, 180, 180);
+    doc.line(MARGIN_L, y + headerH, MARGIN_L + tableW, y + headerH);
+    let cx = MARGIN_L;
+    headers.forEach((h, i) => {
+      doc.text(h, cx + cellPad, y + headerH - 2.5);
+      cx += colWidths[i];
+    });
+    y += headerH;
+  };
+
+  drawHeader();
+
+  doc.setFontSize(8.5);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(30, 30, 30);
+
+  for (const row of rows) {
+    const linesPerCol: string[][] = row.map((cell, i) => {
+      const res = doc.splitTextToSize(cell, colWidths[i] - cellPad * 2);
+      return Array.isArray(res) ? res : [res];
+    });
+    const rowH = Math.max(...linesPerCol.map((l) => l.length)) * lineH + cellPad * 2;
+
+    if (y + rowH > 285) {
+      doc.addPage();
+      y = 25;
+      drawHeader();
+    }
+
+    let cx = MARGIN_L;
+    for (let i = 0; i < row.length; i++) {
+      const lines = linesPerCol[i];
+      const baseY = y + rowH - cellPad;
+      lines.forEach((ln, li) => {
+        doc.text(ln, cx + cellPad, baseY - (lines.length - 1 - li) * lineH);
+      });
+      cx += colWidths[i];
+    }
+
+    doc.setDrawColor(225, 225, 225);
+    doc.line(MARGIN_L, y + rowH, MARGIN_L + tableW, y + rowH);
+    y += rowH;
+  }
+
+  return y + 3;
+}
+
+export interface AbsensiRekapRecord {
+  guru_id: string;
+  tanggal: string;
+  status: string;
+  check_in: string | null;
+  check_out: string | null;
+  keterangan: string | null;
+  guru_name: string;
+}
+
+export async function generateAbsensiRekapPDF(params: {
+  startDate: string;
+  endDate: string;
+  guruList: { id: string; full_name: string }[];
+  records: AbsensiRekapRecord[];
+}) {
+  const JsPdf = await getDoc();
+  const doc = new JsPdf("p", "mm", "a4");
+  let y = 25;
+
+  const { startDate, endDate, guruList, records } = params;
+  const periode =
+    startDate === endDate
+      ? fmtDate(startDate)
+      : `${fmtDate(startDate)} - ${fmtDate(endDate)}`;
+
+  y = header(doc, "Rekap Absensi", "IIS PSM Daycare & Preschool Magetan", `Periode: ${periode}`, y);
+
+  // ── Ringkasan per guru ──
+  const emptyCounts = { Hadir: 0, Izin: 0, Sakit: 0, Alpha: 0, Cuti: 0 };
+  const countsByGuru = new Map<string, typeof emptyCounts>();
+  for (const g of guruList) countsByGuru.set(g.id, { ...emptyCounts });
+  for (const r of records) {
+    const counts = countsByGuru.get(r.guru_id) ?? { ...emptyCounts };
+    if (r.status in counts) counts[r.status as keyof typeof emptyCounts]++;
+    countsByGuru.set(r.guru_id, counts);
+  }
+
+  const summaryRows = guruList.map((g) => {
+    const c = countsByGuru.get(g.id) ?? { ...emptyCounts };
+    const total = c.Hadir + c.Izin + c.Sakit + c.Alpha + c.Cuti;
+    return [g.full_name, String(c.Hadir), String(c.Izin), String(c.Sakit), String(c.Alpha), String(c.Cuti), String(total)];
+  });
+
+  y = checkPageBreak(doc, y, 16);
+  y += 4;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(50, 50, 50);
+  doc.text("Ringkasan Per Guru", MARGIN_L, y);
+  y += 6;
+
+  y = drawTable(doc, ["Guru", "Hadir", "Izin", "Sakit", "Alpha", "Cuti", "Total"],
+    [56, 19, 19, 19, 19, 19, 19], summaryRows, y);
+
+  // ── Rincian per hari ──
+  const detailRows = [...records]
+    .sort((a, b) =>
+      a.tanggal === b.tanggal ? a.guru_name.localeCompare(b.guru_name) : a.tanggal.localeCompare(b.tanggal)
+    )
+    .map((r) => [
+      fmtDateShort(r.tanggal),
+      r.guru_name,
+      r.status,
+      fmtTime(r.check_in),
+      fmtTime(r.check_out),
+      r.keterangan || "-",
+    ]);
+
+  y = checkPageBreak(doc, y, 16);
+  y += 4;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(50, 50, 50);
+  doc.text("Rincian Per Hari", MARGIN_L, y);
+  y += 6;
+
+  y = drawTable(doc, ["Tanggal", "Guru", "Status", "Masuk", "Pulang", "Keterangan"],
+    [28, 45, 20, 18, 18, 41], detailRows, y);
+
+  y = checkPageBreak(doc, y, 10);
+  y = sectionDivider(doc, y);
+  doc.setFontSize(9);
+  doc.setTextColor(150, 150, 150);
+  doc.text(`Dibuat: ${fmtDateTime(new Date().toISOString())}`, PAGE_W - MARGIN_R, y, { align: "right" });
+
+  return doc;
+}
+
 export async function generateLaporanPDF(laporan: LaporanTriwulan & { siswa?: { nama: string; kelas: string } }) {
   const JsPdf = await getDoc();
   const doc = new JsPdf("p", "mm", "a4");
