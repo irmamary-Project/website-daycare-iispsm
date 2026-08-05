@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LOGO_URL } from "@/lib/constants";
+import Image from "next/image";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -82,10 +83,12 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="card mb-6">
           <div className="flex justify-center mb-6">
-            <img
+            <Image
               className="max-w-[160px]"
               src={LOGO_URL}
               alt="Logo IIS"
+              width={160}
+              height={160}
             />
           </div>
 

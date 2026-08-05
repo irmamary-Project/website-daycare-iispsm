@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { FITRAH_LIST, type PortofolioMedia } from "@/types";
 import Link from "next/link";
 import PortoDetailClient from "./PortoDetailClient";
@@ -82,10 +83,12 @@ export default async function PortoDetailPage({
                 {porto.portofolio_media.map((m: PortofolioMedia) => (
                   <div key={m.id} className="rounded-lg overflow-hidden border bg-gray-50">
                     {m.tipe === "foto" ? (
-                      <img
+                      <Image
                         src={m.url}
                         alt={m.nama_file ?? "Foto"}
                         className="w-full aspect-square object-cover"
+                        width={500}
+                        height={500}
                         loading="lazy"
                       />
                     ) : (

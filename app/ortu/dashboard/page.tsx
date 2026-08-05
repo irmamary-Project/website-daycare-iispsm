@@ -3,6 +3,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Portofolio, PortofolioMedia } from "@/types";
+import Image from "next/image";
 
 
 export default async function OrtuDashboard() {
@@ -161,7 +162,7 @@ export default async function OrtuDashboard() {
               return (
                 <div key={p.id} className="rounded-xl overflow-hidden bg-primary-pale aspect-square flex items-center justify-center relative">
                   {foto ? (
-                    <img src={foto.url} alt="" className="w-full h-full object-cover" />
+                    <Image src={foto.url} alt="" fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
                   ) : (
                     <span className="text-3xl">📷</span>
                   )}

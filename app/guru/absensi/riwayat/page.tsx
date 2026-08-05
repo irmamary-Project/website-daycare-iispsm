@@ -34,7 +34,6 @@ export default function AbsensiRiwayatPage() {
 
       const { data: { user } } = await supabase.auth.getUser();
       let isAdminUser = false;
-      let guruIdFilter = "";
       if (user) {
         const { data: profile } = await supabase
           .from("profiles")
@@ -50,7 +49,6 @@ export default function AbsensiRiwayatPage() {
             .eq("role", "guru");
           if (!cancelled) setGuruList(gurus ?? []);
 
-          guruIdFilter = selectedGuru;
           if (selectedGuru) {
             params.set("guru_id", selectedGuru);
           }

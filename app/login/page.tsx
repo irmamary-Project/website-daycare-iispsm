@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LOGO_URL } from "@/lib/constants";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -120,10 +121,12 @@ export default function LoginPage() {
       <div className="hidden lg:flex flex-col justify-between w-[420px] flex-shrink-0 p-6 bg-primary">
         <div>
           <div className="flex items-center justify-center mb-5">
-            <img
+            <Image
               className="max-w-[255px]"
               src={LOGO_URL}
               alt="Logo IIS"
+              width={255}
+              height={255}
             />
           </div>
           <h1 className="text-white font-serif text-4xl font-bold leading-tight mb-4">

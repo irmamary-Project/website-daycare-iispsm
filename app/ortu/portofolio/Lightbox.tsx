@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState, useCallback } from "react";
 
 interface MediaItem {
@@ -18,14 +19,16 @@ export default function PortfolioMedia({ media }: { media: MediaItem[] }) {
         {media.map((m) => (
           <div
             key={m.id}
-            className="rounded-xl overflow-hidden bg-primary-pale aspect-square cursor-pointer group"
+            className="rounded-xl overflow-hidden bg-primary-pale aspect-square cursor-pointer group relative"
             onClick={() => m.tipe === "foto" && setExpanded(m.url)}
           >
             {m.tipe === "foto" ? (
-              <img
+              <Image
                 src={m.url}
                 alt=""
-                className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                fill
+                sizes="(max-width: 640px) 50vw, 33vw"
+                className="object-cover transition-transform duration-200 group-hover:scale-105"
               />
             ) : (
               <video
@@ -50,9 +53,11 @@ export default function PortfolioMedia({ media }: { media: MediaItem[] }) {
           >
             ✕
           </button>
-          <img
+          <Image
             src={expanded}
             alt=""
+            width={1200}
+            height={900}
             className="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />

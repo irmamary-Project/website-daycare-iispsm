@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import Link from 'next/link'
 import { LOGO_URL, FACILITIES_IMG_URL, GALLERY_BASE_URL } from '@/lib/constants';
 
@@ -1228,7 +1229,7 @@ footer .f-copy {
       <nav>
         <a className="nav-brand" href="#">
           <div className="nav-logo">
-            <img               src={LOGO_URL} alt="Energia Kids Daycare" />
+            <Image src={LOGO_URL} alt="Energia Kids Daycare" width={155} height={155} />
           </div>
         </a>
         <ul className="nav-links">
@@ -1486,10 +1487,11 @@ footer .f-copy {
           </div>
           <div className="fac-right">
             <div className="fac-img-box" style={{ position: "relative" }}>
-              <img
+              <Image
                 src={FACILITIES_IMG_URL}
                 alt="Fasilitas Energia Kids Daycare"
-                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+                fill
+                style={{ objectFit: "cover", borderRadius: "inherit" }}
               />
               <Link
                 href="/login"
@@ -1529,8 +1531,8 @@ footer .f-copy {
         </div>
         <div className="gallery-grid">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `${GALLERY_BASE_URL}/gallery${n}.jpg`).map((src, i) => (
-            <div className="gallery-item" key={i}>
-              <img src={src} alt={`Gallery item ${i + 1}`} />
+            <div className="gallery-item relative" key={i}>
+              <Image src={src} alt={`Gallery item ${i + 1}`} fill sizes="(max-width: 480px) 50vw, (max-width: 768px) 33vw, 25vw" className="object-cover" />
             </div>
           ))}
         </div>

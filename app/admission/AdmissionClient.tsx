@@ -3,6 +3,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { LOGO_URL } from "@/lib/constants";
 import Link from "next/link";
+import Image from "next/image";
 import { KELAS_LIST } from "@/types";
 
 const STEPS = ["Data Orang Tua", "Data Anak", "Konfirmasi"];
@@ -156,7 +157,7 @@ export default function AdmissionClient() {
         justifyContent: "space-between", height: "80px",
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
-          <img src={LOGO_URL} alt="IIS PSM" style={{ height: "48px", borderRadius: "50%" }} />
+          <Image src={LOGO_URL} alt="IIS PSM" width={48} height={48} style={{ height: "48px", borderRadius: "50%" }} />
           <div>
             <div style={{ fontFamily: "Fredoka, sans-serif", fontWeight: 600, fontSize: "16px", color: "var(--primary)" }}>Energia Kids Daycare</div>
             <div style={{ fontFamily: "Nunito, sans-serif", fontSize: "11px", color: "var(--text-muted)" }}>Penerimaan Siswa Baru</div>
