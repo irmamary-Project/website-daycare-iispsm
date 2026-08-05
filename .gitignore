@@ -5,9 +5,8 @@ node_modules
 .env.*.local
 .mimocode
 ._distill_query*.py
-supabase/migrations/*.sql
-supabase/schema.sql
 .vercel
 .env*
+tsconfig.tsbuildinfo
 
 .vercel
