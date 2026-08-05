@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
@@ -26,43 +26,46 @@ export default function AbsensiRiwayatPage() {
   const [guruList, setGuruList] = useState<{ id: string; full_name: string }[]>([]);
   const [selectedGuru, setSelectedGuru] = useState<string>("");
 
-  const fetchRecords = useCallback(async () => {
-    setLoading(true);
-    const params = new URLSearchParams({ bulan });
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const params = new URLSearchParams({ bulan });
 
-    // Check role
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if (profile?.role === "admin") {
-        setIsAdmin(true);
-        // Fetch guru list
-        const { data: gurus } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      let isAdminUser = false;
+      let guruIdFilter = "";
+      if (user) {
+        const { data: profile } = await supabase
           .from("profiles")
-          .select("id, full_name")
-          .eq("role", "guru");
-        setGuruList(gurus ?? []);
+          .select("role")
+          .eq("id", user.id)
+          .single();
 
-        if (selectedGuru) {
-          params.set("guru_id", selectedGuru);
+        if (profile?.role === "admin") {
+          isAdminUser = true;
+          const { data: gurus } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .eq("role", "guru");
+          if (!cancelled) setGuruList(gurus ?? []);
+
+          guruIdFilter = selectedGuru;
+          if (selectedGuru) {
+            params.set("guru_id", selectedGuru);
+          }
         }
       }
-    }
 
-    const res = await fetch(`/api/absensi/riwayat?${params.toString()}`);
-    const data = await res.json();
-    setRecords(Array.isArray(data) ? data : []);
-    setLoading(false);
+      const res = await fetch(`/api/absensi/riwayat?${params.toString()}`);
+      const data = await res.json();
+      if (cancelled) return;
+      if (isAdminUser) setIsAdmin(true);
+      setRecords(Array.isArray(data) ? data : []);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
   }, [supabase, bulan, selectedGuru]);
-
-  useEffect(() => {
-    fetchRecords();
-  }, [fetchRecords]);
 
   // Rekap
   const rekap = {

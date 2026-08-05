@@ -3,8 +3,13 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import type { Siswa } from "@/types";
 
-export default function AdmissionApprovalClient({ siswa }: { siswa: any }) {
+export type AdmissionSiswa = Siswa & {
+  profiles?: { full_name: string | null; email: string | null; phone: string | null } | null;
+};
+
+export default function AdmissionApprovalClient({ siswa }: { siswa: AdmissionSiswa }) {
   const supabase = createClient();
   const router = useRouter();
   const [loading, setLoading] = useState<"approve" | "reject" | null>(null);

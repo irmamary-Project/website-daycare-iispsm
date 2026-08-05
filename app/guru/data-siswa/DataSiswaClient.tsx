@@ -10,6 +10,16 @@ interface Props {
   isAdmin: boolean;
 }
 
+async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...init?.headers },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "Terjadi kesalahan");
+  return data;
+}
+
 const EMPTY_FORM = {
   nama: "", jenis_kelamin: "L" as "L" | "P",
   tanggal_lahir: "", kelas: "KB Preschool 1",
@@ -77,22 +87,35 @@ export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin 
       kelas: form.kelas, ortu_id: form.ortu_id || null,
       status: form.status, catatan: form.catatan || null,
     };
-    if (editId) {
-      const { error } = await supabase.from("siswa").update(payload).eq("id", editId);
-      if (error) { setMsg("Gagal: " + error.message); setSaving(false); return; }
-      setSiswaList(prev => prev.map(s => s.id === editId ? { ...s, ...payload } as Siswa & { ortu?: Profile } : s));
-    } else {
-      const { data, error } = await supabase.from("siswa").insert(payload).select().single();
-      if (error) { setMsg("Gagal: " + error.message); setSaving(false); return; }
-      setSiswaList(prev => [...prev, data]);
+    try {
+      if (editId) {
+        const { data } = await apiJson<{ data: Siswa }>(`/api/siswa/${editId}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+        setSiswaList(prev => prev.map(s => s.id === editId ? { ...s, ...data } as Siswa & { ortu?: Profile } : s));
+      } else {
+        const { data } = await apiJson<{ data: Siswa }>("/api/siswa", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        setSiswaList(prev => [...prev, data as Siswa & { ortu?: Profile }]);
+      }
+      setSaving(false); setShowModal(false);
+    } catch (e) {
+      setMsg("Gagal: " + (e instanceof Error ? e.message : "Terjadi kesalahan"));
+      setSaving(false);
     }
-    setSaving(false); setShowModal(false);
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Hapus data siswa ini? Semua laporan terkait ikut terhapus.")) return;
-    await supabase.from("siswa").delete().eq("id", id);
-    setSiswaList(prev => prev.filter(s => s.id !== id));
+    try {
+      await apiJson(`/api/siswa/${id}`, { method: "DELETE" });
+      setSiswaList(prev => prev.filter(s => s.id !== id));
+    } catch (e) {
+      setMsg("Gagal hapus: " + (e instanceof Error ? e.message : "Terjadi kesalahan"));
+    }
   }
 
   // Export CSV
@@ -161,12 +184,11 @@ export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin 
               <button onClick={handleExport} className="btn-outline">📥 Export CSV</button>
               <button onClick={handleExportPDF} disabled={exportingPDF} className="btn-outline">📄 Export PDF</button>
               <button onClick={() => { setShowImportModal(true); setImportFile(null); setImportResult(""); }} className="btn-outline">📤 Import CSV</button>
+              <button onClick={openAdd} className="btn-primary">+ Tambah Siswa</button>
             </>
           )}
-          <button onClick={openAdd} className="btn-primary">+ Tambah Siswa</button>
         </div>
       </div>
-
       {/* Filters */}
       <div className="card mb-6 flex flex-wrap gap-3">
         <input className="input flex-1 min-w-[180px]" placeholder="🔍 Cari nama siswa..."
@@ -189,7 +211,7 @@ export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin 
         <table className="w-full text-sm min-w-[700px]">
           <thead>
             <tr className="bg-[var(--primary)] text-white text-xs">
-              {["Nama", "Kelas", "Usia", "Jenis Kelamin", "Orang Tua", "Status", "Aksi"].map(h => (
+              {["Nama", "Kelas", "Usia", "Jenis Kelamin", "Orang Tua", "Status", ...(isAdmin ? ["Aksi"] : [])].map(h => (
                 <th key={h} className="text-left px-4 py-3 font-medium whitespace-nowrap first:rounded-tl-2xl last:rounded-tr-2xl">{h}</th>
               ))}
             </tr>
@@ -218,17 +240,19 @@ export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin 
                       {s.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button onClick={() => openEdit(s)} className="text-xs px-3 py-1 rounded-lg border border-[var(--primary-border)] hover:bg-[var(--primary-pale)] transition-colors">Edit</button>
-                      <button onClick={() => handleDelete(s.id)} className="text-xs px-3 py-1 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors">Hapus</button>
-                    </div>
-                  </td>
+                  {isAdmin && (
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(s)} className="text-xs px-3 py-1 rounded-lg border border-[var(--primary-border)] hover:bg-[var(--primary-pale)] transition-colors">Edit</button>
+                        <button onClick={() => handleDelete(s.id)} className="text-xs px-3 py-1 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors">Hapus</button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={7} className="text-center py-10 text-gray-400">Tidak ada data siswa yang ditemukan.</td></tr>
+              <tr><td colSpan={isAdmin ? 7 : 6} className="text-center py-10 text-gray-400">Tidak ada data siswa yang ditemukan.</td></tr>
             )}
           </tbody>
         </table>
@@ -277,7 +301,7 @@ export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin 
               </div>
               <div>
                 <label className="label">Status</label>
-                <select className="input" value={form.status} onChange={e => setForm(f => ({...f, status: e.target.value as any}))}>
+                <select className="input" value={form.status} onChange={e => setForm(f => ({...f, status: e.target.value as Siswa["status"]}))}>
                   <option value="aktif">Aktif</option>
                   <option value="cuti">Cuti</option>
                   <option value="alumni">Alumni</option>

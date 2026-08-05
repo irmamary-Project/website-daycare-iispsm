@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { FITRAH_LIST } from "@/types";
+import { FITRAH_LIST, type PortofolioMedia } from "@/types";
 import Link from "next/link";
 import PortoDetailClient from "./PortoDetailClient";
 
@@ -79,7 +79,7 @@ export default async function PortoDetailPage({
             <div className="py-3">
               <span className="font-medium text-gray-600 text-xs sm:text-sm block mb-2">Media ({porto.portofolio_media.length})</span>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                {porto.portofolio_media.map((m: any) => (
+                {porto.portofolio_media.map((m: PortofolioMedia) => (
                   <div key={m.id} className="rounded-lg overflow-hidden border bg-gray-50">
                     {m.tipe === "foto" ? (
                       <img

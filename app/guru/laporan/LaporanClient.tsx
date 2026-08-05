@@ -1,14 +1,19 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { FITRAH_LIST, CAPAIAN_OPTIONS, FitrahPenilaian, CapaianType } from "@/types";
+import { FITRAH_LIST, CAPAIAN_OPTIONS, FitrahPenilaian, CapaianType, type Siswa, type LaporanTriwulan } from "@/types";
 
 const currentYear = new Date().getFullYear();
 const PERIODES = ["Q1", "Q2", "Q3", "Q4"].map(q => `${q}-${currentYear}`);
 
 const DEFAULT_FITRAH: FitrahPenilaian = { capaian: "BSH", catatan: "" };
 
-export default function LaporanClient({ siswaList, guruId }: { siswaList: any[]; guruId: string }) {
+type LaporanPayload = Omit<LaporanTriwulan, "id" | "created_at" | "siswa" | "status" | "dikirim_at"> & {
+  status: "draft" | "terkirim";
+  dikirim_at: string | null;
+};
+
+export default function LaporanClient({ siswaList, guruId }: { siswaList: Pick<Siswa, "id" | "nama" | "kelas">[]; guruId: string }) {
   const supabase = createClient();
   const [siswaId, setSiswaId] = useState("");
   const [periode, setPeriode] = useState(PERIODES[0]);
@@ -28,7 +33,7 @@ export default function LaporanClient({ siswaList, guruId }: { siswaList: any[];
     if (!siswaId) return setMsg("Pilih siswa terlebih dahulu.");
     setSaving(true); setMsg("");
 
-    const payload: any = {
+    const payload: LaporanPayload & Record<string, unknown> = {
       siswa_id: siswaId, guru_id: guruId,
       periode, tahun: currentYear,
       catatan_umum: catatanUmum, rekomendasi,

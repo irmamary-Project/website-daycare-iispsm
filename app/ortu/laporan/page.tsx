@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { FITRAH_LIST, CAPAIAN_OPTIONS } from "@/types";
+import { FITRAH_LIST, LaporanTriwulan } from "@/types";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import PDFExportButton from "@/components/riwayat/PDFExportButton";
@@ -33,7 +33,7 @@ export default async function OrtuLaporanPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {laporans.map((l: any) => (
+          {laporans.map((l: LaporanTriwulan) => (
             <div key={l.id} className="card">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
                 <div>
@@ -51,7 +51,6 @@ export default async function OrtuLaporanPage() {
                 {FITRAH_LIST.map(f => {
                   const penilaian = l[`fitrah_${f.key}`];
                   if (!penilaian) return null;
-                  const capaian = CAPAIAN_OPTIONS.find(c => c.value === penilaian.capaian);
                   return (
                     <div key={f.key} className="bg-[var(--cream)] rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">

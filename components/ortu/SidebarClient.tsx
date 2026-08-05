@@ -17,42 +17,22 @@ const NAV = [
 
 const LG = 1024; // breakpoint laptop
 
-export default function OrtuSidebarClient({
+function SidebarContent({
   profile,
   unreadCount,
   anak,
+  pathname,
+  onClose,
+  onLogout,
 }: {
   profile: Profile;
   unreadCount: number;
   anak: { id: string; nama: string; kelas: string }[];
+  pathname: string;
+  onClose?: () => void;
+  onLogout: () => void;
 }) {
-  const pathname  = usePathname();
-  const router    = useRouter();
-  const supabase  = createClient();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [isDesktop, setIsDesktop]   = useState(false);
-
-  // Deteksi ukuran layar — tidak bergantung Tailwind
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= LG);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-
-  // Tutup drawer kalau resize ke desktop
-  useEffect(() => {
-    if (isDesktop) setMobileOpen(false);
-  }, [isDesktop]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
-
-  /* ── SHARED SIDEBAR CONTENT ── */
-  const SidebarContent = ({ onClose }: { onClose?: () => void }) => (
+  return (
     <>
       {/* BRAND */}
       <div style={{ padding: "20px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
@@ -206,7 +186,7 @@ export default function OrtuSidebarClient({
           </div>
         </div>
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           style={{
             width: "100%", display: "flex", alignItems: "center", gap: "8px",
             padding: "9px 12px", borderRadius: "10px",
@@ -232,6 +212,39 @@ export default function OrtuSidebarClient({
       </div>
     </>
   );
+}
+
+export default function OrtuSidebarClient({
+  profile,
+  unreadCount,
+  anak,
+}: {
+  profile: Profile;
+  unreadCount: number;
+  anak: { id: string; nama: string; kelas: string }[];
+}) {
+  const pathname  = usePathname();
+  const router    = useRouter();
+  const supabase  = createClient();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isDesktop, setIsDesktop]   = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= LG : false
+  );
+
+  // Deteksi ukuran layar — tidak bergantung Tailwind
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= LG);
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
+  const close = () => setMobileOpen(false);
 
   return (
     <>
@@ -284,7 +297,7 @@ export default function OrtuSidebarClient({
       {/* ── MOBILE OVERLAY ── */}
       {!isDesktop && mobileOpen && (
         <div
-          onClick={() => setMobileOpen(false)}
+          onClick={close}
           style={{
             position: "fixed", inset: 0, zIndex: 50,
             background: "rgba(0,0,0,0.5)",
@@ -302,7 +315,14 @@ export default function OrtuSidebarClient({
           transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 0.3s ease",
         }}>
-          <SidebarContent onClose={() => setMobileOpen(false)} />
+          <SidebarContent
+            profile={profile}
+            unreadCount={unreadCount}
+            anak={anak}
+            pathname={pathname}
+            onClose={close}
+            onLogout={handleLogout}
+          />
         </aside>
       )}
 
@@ -314,7 +334,13 @@ export default function OrtuSidebarClient({
           display: "flex", flexDirection: "column",
           minHeight: "100vh", position: "sticky", top: 0,
         }}>
-          <SidebarContent />
+          <SidebarContent
+            profile={profile}
+            unreadCount={unreadCount}
+            anak={anak}
+            pathname={pathname}
+            onLogout={handleLogout}
+          />
         </aside>
       )}
     </>

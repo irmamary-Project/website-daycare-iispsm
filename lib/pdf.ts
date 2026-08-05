@@ -537,7 +537,7 @@ export async function generateSkriningPDF(sk: SkriningRecord) {
     return Number(idA) - Number(idB);
   });
 
-  const rows: string[][] = questionKeys.map((key, i) => {
+  const rows: string[][] = questionKeys.map((key) => {
     const [, idStr] = key.split("-");
     const id = Number(idStr);
     const ageGroup = KPSP_DATA.find((g) => key.startsWith(`${g.months}-`));

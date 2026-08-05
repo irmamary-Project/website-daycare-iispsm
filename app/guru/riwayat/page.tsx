@@ -3,12 +3,26 @@ import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import RiwayatFilter from "./RiwayatFilter";
+import type { DailyReport, Portofolio, LaporanTriwulan } from "@/types";
 
 const DETAIL_LINKS: Record<string, (id: string) => string> = {
   daily:   (id) => `/guru/riwayat/daily/${id}`,
   porto:   (id) => `/guru/riwayat/porto/${id}`,
   laporan: (id) => `/guru/riwayat/laporan/${id}`,
 };
+
+interface RiwayatItem {
+  _type: "daily" | "porto" | "laporan";
+  _date: string;
+  id: string;
+  status: string;
+  siswa?: { nama: string } | null;
+  tanggal?: string;
+  kehadiran?: string;
+  periode?: string;
+  tahun?: number;
+  portofolio_media?: { id: string }[];
+}
 
 export default async function RiwayatPage({
   searchParams,
@@ -21,11 +35,11 @@ export default async function RiwayatPage({
   const startDate = start && !isNaN(Date.parse(start)) ? start : undefined;
   const endDate = end && !isNaN(Date.parse(end)) ? end : undefined;
 
-  function filterDate(q: any, col = "created_at") {
-    let query = q;
-    if (startDate) query = query.gte(col, startDate);
-    if (endDate) query = query.lte(col, `${endDate}T23:59:59.999Z`);
-    if (siswa_id) query = query.eq("siswa_id", siswa_id);
+  function filterDate<Q>(q: Q, col = "created_at"): Q {
+    let query: Q = q;
+    if (startDate) query = (query as unknown as { gte: (c: string, v: unknown) => unknown }).gte(col, startDate) as Q;
+    if (endDate) query = (query as unknown as { lte: (c: string, v: unknown) => unknown }).lte(col, `${endDate}T23:59:59.999Z`) as Q;
+    if (siswa_id) query = (query as unknown as { eq: (c: string, v: unknown) => unknown }).eq("siswa_id", siswa_id) as Q;
     return query;
   }
 
@@ -40,10 +54,10 @@ export default async function RiwayatPage({
   ]);
 
   // Merge and sort all
-  const all = [
-    ...(dailyReports ?? []).map((r: any) => ({ ...r, _type: "daily" as const, _date: r.created_at })),
-    ...(portofolios ?? []).map((r: any) => ({ ...r, _type: "porto" as const, _date: r.created_at })),
-    ...(laporans ?? []).map((r: any) => ({ ...r, _type: "laporan" as const, _date: r.created_at })),
+  const all: RiwayatItem[] = [
+    ...(dailyReports ?? []).map((r: DailyReport) => ({ ...r, _type: "daily" as const, _date: r.created_at })),
+    ...(portofolios ?? []).map((r: Portofolio) => ({ ...r, _type: "porto" as const, _date: r.created_at })),
+    ...(laporans ?? []).map((r: LaporanTriwulan) => ({ ...r, _type: "laporan" as const, _date: r.created_at })),
   ].sort((a, b) => new Date(b._date).getTime() - new Date(a._date).getTime());
 
   const typeConfig: Record<string, { icon: string; label: string; color: string }> = {
@@ -71,7 +85,7 @@ export default async function RiwayatPage({
       </div>
 
       <div className="space-y-3">
-        {all.map((item: any) => {
+        {all.map((item: RiwayatItem) => {
           const cfg = typeConfig[item._type];
           const href = DETAIL_LINKS[item._type]?.(item.id);
           return (

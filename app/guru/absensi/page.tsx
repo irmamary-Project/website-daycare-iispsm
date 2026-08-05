@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
@@ -45,21 +45,20 @@ export default function AbsensiPage() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  // Fetch config + absensi hari ini
-  const fetchData = useCallback(async () => {
-    const [configRes, absensiRes] = await Promise.all([
-      supabase.from("geofence_config").select("*").limit(1).single(),
-      supabase.from("absensi_guru").select("*").eq("tanggal", today).single(),
-    ]);
-
-    if (configRes.data) setConfig(configRes.data);
-    if (absensiRes.data) setAbsensi(absensiRes.data);
-    setLoading(false);
-  }, [supabase, today]);
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let cancelled = false;
+    (async () => {
+      const [configRes, absensiRes] = await Promise.all([
+        supabase.from("geofence_config").select("*").limit(1).single(),
+        supabase.from("absensi_guru").select("*").eq("tanggal", today).single(),
+      ]);
+      if (cancelled) return;
+      if (configRes.data) setConfig(configRes.data);
+      if (absensiRes.data) setAbsensi(absensiRes.data);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [supabase, today]);
 
   // Ambil GPS
   function getGps(): Promise<{ lat: number; lng: number }> {
@@ -92,9 +91,9 @@ export default function AbsensiPage() {
         const d = haversine(coords.lat, coords.lng, config.latitude, config.longitude);
         setDistance(Math.round(d));
       }
-    } catch (e: any) {
+    } catch (e) {
       setGpsStatus("error");
-      setErrorMsg(e.message);
+      setErrorMsg(e instanceof Error ? e.message : String(e));
     }
   }
 

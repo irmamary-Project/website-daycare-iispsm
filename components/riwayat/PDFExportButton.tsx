@@ -12,7 +12,7 @@ export default function PDFExportButton({
   filename,
 }: {
   type: ReportType;
-  data: any;
+  data: DailyReport | Portofolio | LaporanTriwulan;
   filename: string;
 }) {
   const loadingRef = useRef(false);

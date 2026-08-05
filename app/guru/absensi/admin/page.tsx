@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { todayWIB } from "@/lib/date";
-import { generateAbsensiRekapPDF } from "@/lib/pdf";
+import { generateAbsensiRekapPDF, type AbsensiRekapRecord } from "@/lib/pdf";
 
 interface GuruAbsensi {
   guru_id: string;
@@ -38,48 +38,46 @@ export default function AdminAbsensiPage() {
   const [exportEnd, setExportEnd] = useState(() => todayWIB());
   const [exportLoading, setExportLoading] = useState(false);
   const [exportMsg, setExportMsg] = useState("");
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-
-    // Fetch all guru
-    const { data: gurus } = await supabase
-      .from("profiles")
-      .select("id, full_name")
-      .eq("role", "guru");
-    setAllGuru(gurus ?? []);
-
-    // Fetch absensi untuk tanggal yang dipilih
-    const { data } = await supabase
-      .from("absensi_guru")
-      .select("guru_id, check_in, check_out, status, keterangan, profiles:guru_id(full_name)")
-      .eq("tanggal", selectedDate);
-
-    // Merge: tampilkan semua guru, yang belum ada record tampilkan status "Belum"
-    const absensiMap = new Map<string, any>();
-    data?.forEach((r: any) => {
-      absensiMap.set(r.guru_id, r);
-    });
-
-    const merged: GuruAbsensi[] = (gurus ?? []).map((g) => {
-      const abs = absensiMap.get(g.id);
-      return {
-        guru_id: g.id,
-        full_name: g.full_name,
-        check_in: abs?.check_in ?? null,
-        check_out: abs?.check_out ?? null,
-        status: abs?.status ?? "Belum",
-        keterangan: abs?.keterangan ?? null,
-      };
-    });
-
-    setRecords(merged);
-    setLoading(false);
-  }, [supabase, selectedDate]);
+  const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let cancelled = false;
+    (async () => {
+      const { data: gurus } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("role", "guru");
+
+      const { data } = await supabase
+        .from("absensi_guru")
+        .select("guru_id, check_in, check_out, status, keterangan, profiles:guru_id(full_name)")
+        .eq("tanggal", selectedDate);
+
+      if (cancelled) return;
+
+      const absensiMap = new Map<string, Pick<GuruAbsensi, "check_in" | "check_out" | "status" | "keterangan">>();
+      data?.forEach((r) => {
+        absensiMap.set(r.guru_id, r);
+      });
+
+      const merged: GuruAbsensi[] = (gurus ?? []).map((g) => {
+        const abs = absensiMap.get(g.id);
+        return {
+          guru_id: g.id,
+          full_name: g.full_name,
+          check_in: abs?.check_in ?? null,
+          check_out: abs?.check_out ?? null,
+          status: abs?.status ?? "Belum",
+          keterangan: abs?.keterangan ?? null,
+        };
+      });
+
+      setAllGuru(gurus ?? []);
+      setRecords(merged);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [supabase, selectedDate, refresh]);
 
   async function handleInputManual() {
     if (!formGuru || !formStatus) return;
@@ -107,7 +105,7 @@ export default function AdminAbsensiPage() {
       setFormGuru("");
       setFormStatus("Izin");
       setFormKeterangan("");
-      fetchData();
+      setRefresh(r => r + 1);
     } catch {
       setMsg("Gagal menghubungi server");
     } finally {
@@ -136,14 +134,14 @@ export default function AdminAbsensiPage() {
         .gte("tanggal", exportStart)
         .lte("tanggal", exportEnd);
 
-      const records = (absenData ?? []).map((r: any) => ({
+      const records: AbsensiRekapRecord[] = (absenData ?? []).map((r) => ({
         guru_id: r.guru_id,
         tanggal: r.tanggal,
         status: r.status,
         check_in: r.check_in,
         check_out: r.check_out,
         keterangan: r.keterangan,
-        guru_name: r.profiles?.full_name ?? "-",
+        guru_name: (r.profiles as unknown as { full_name: string } | null | undefined)?.full_name ?? "-",
       }));
 
       const doc = await generateAbsensiRekapPDF({

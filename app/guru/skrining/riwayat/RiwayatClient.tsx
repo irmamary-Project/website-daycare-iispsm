@@ -164,7 +164,7 @@ export default function RiwayatSkriningClient({ screenings }: { screenings: Scre
                     <h4 className="font-semibold text-primary text-sm mb-3">Detail Jawaban</h4>
                     <div className="space-y-2 mb-4">
                       {Object.entries(s.jawaban).map(([key, val]) => {
-                        const [months, id] = key.split("-");
+                        const [, id] = key.split("-");
                         return (
                           <div key={key} className="flex items-center gap-3 text-sm">
                             <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">

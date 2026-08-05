@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import AdmissionApprovalClient from "./AdmissionApprovalClient";
+import AdmissionApprovalClient, { type AdmissionSiswa } from "./AdmissionApprovalClient";
 
 export default async function AdminAdmissionPage() {
   const supabase = await createClient();
@@ -44,7 +43,7 @@ export default async function AdminAdmissionPage() {
                 Menunggu Persetujuan <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full ml-2">{pending.length}</span>
               </h2>
               <div className="space-y-4">
-                {pending.map((siswa: any) => (
+                {pending.map((siswa: AdmissionSiswa) => (
                   <AdmissionApprovalClient key={siswa.id} siswa={siswa} />
                 ))}
               </div>
@@ -57,7 +56,7 @@ export default async function AdminAdmissionPage() {
                 Ditolak <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full ml-2">{ditolak.length}</span>
               </h2>
               <div className="space-y-3">
-                {ditolak.map((siswa: any) => (
+                {ditolak.map((siswa: AdmissionSiswa) => (
                   <div key={siswa.id} className="card bg-red-50 border-red-200 !p-4">
                     <div className="flex items-center justify-between">
                       <div>

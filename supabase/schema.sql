@@ -295,8 +295,14 @@ create policy "pengumuman_ortu_select" on public.pengumuman for select
     public.get_user_role() = 'ortu'
   );
 
--- Notifikasi: hanya bisa baca notifikasi sendiri
-create policy "notif_own" on public.notifikasi for all using (user_id = auth.uid());
+-- Notifikasi: ortu baca/update sendiri; guru & admin bisa kelola + kirim utk ortu
+create policy "notif_ortu_own" on public.notifikasi for select
+  using (user_id = auth.uid());
+create policy "notif_ortu_update" on public.notifikasi for update
+  using (user_id = auth.uid());
+create policy "notif_guru_all" on public.notifikasi for all
+  using (public.get_user_role() in ('guru', 'admin'))
+  with check (public.get_user_role() in ('guru', 'admin'));
 
 -- KPSP screening (data kesehatan anak → ketat):
 --   admin & guru: semua; ortu: hanya anak sendiri.

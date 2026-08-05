@@ -27,25 +27,18 @@ const ADMIN_NAV = [
   { href: "/guru/absensi/geofence", icon: "📍", label: "Atur Geofence" },
 ];
 
-export default function GuruSidebarClient({
+function SidebarContent({
   profile,
-  unreadCount,
+  pathname,
+  onClose,
+  onLogout,
 }: {
   profile: Profile;
-  unreadCount: number;
+  pathname: string;
+  onClose: () => void;
+  onLogout: () => void;
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const supabase = createClient();
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
-
-  const SidebarContent = () => (
+  return (
     <>
       {/* Brand */}
       <div className="px-5 py-5 border-b border-white/10">
@@ -64,7 +57,7 @@ export default function GuruSidebarClient({
           {/* Close button — mobile only */}
           <button
             className="lg:hidden text-white/50 hover:text-white p-1"
-            onClick={() => setMobileOpen(false)}
+            onClick={onClose}
             aria-label="Tutup menu"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -80,7 +73,7 @@ export default function GuruSidebarClient({
           <Link
             key={item.href}
             href={item.href}
-            onClick={() => setMobileOpen(false)}
+            onClick={onClose}
             className={clsx(
               "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
               pathname.startsWith(item.href)
@@ -103,7 +96,7 @@ export default function GuruSidebarClient({
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setMobileOpen(false)}
+                onClick={onClose}
                 className={clsx(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                   pathname.startsWith(item.href)
@@ -131,7 +124,7 @@ export default function GuruSidebarClient({
           </div>
         </div>
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           className="w-full text-left px-3 py-2 rounded-xl text-white/50 hover:text-white hover:bg-white/10 text-sm transition-all"
         >
           → Keluar
@@ -139,6 +132,25 @@ export default function GuruSidebarClient({
       </div>
     </>
   );
+}
+
+export default function GuruSidebarClient({
+  profile,
+}: {
+  profile: Profile;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClient();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
+  const close = () => setMobileOpen(false);
 
   return (
     <>
@@ -173,7 +185,7 @@ export default function GuruSidebarClient({
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 z-50 bg-black/50"
-          onClick={() => setMobileOpen(false)}
+          onClick={close}
         />
       )}
 
@@ -185,7 +197,7 @@ export default function GuruSidebarClient({
         )}
         style={{ background: "var(--primary)" }}
       >
-        <SidebarContent />
+        <SidebarContent profile={profile} pathname={pathname} onClose={close} onLogout={handleLogout} />
       </aside>
 
       {/* ── DESKTOP SIDEBAR ── */}
@@ -193,7 +205,7 @@ export default function GuruSidebarClient({
         className="hidden lg:flex w-60 flex-shrink-0 flex-col min-h-screen sticky top-0"
         style={{ background: "var(--primary)" }}
       >
-        <SidebarContent />
+        <SidebarContent profile={profile} pathname={pathname} onClose={close} onLogout={handleLogout} />
       </aside>
     </>
   );

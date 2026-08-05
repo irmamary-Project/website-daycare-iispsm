@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { Portofolio, PortofolioMedia } from "@/types";
 
 
 export default async function OrtuDashboard() {
@@ -69,18 +70,22 @@ export default async function OrtuDashboard() {
 
   const latestReport = recentDailyReports?.[0];
 
+  // Server component: timestamp dinamis per request, bukan render murni.
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
+
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-primary">Assalamu'alaikum 👋</h1>
-        <p className="text-sm text-gray-500 mt-1">{format(new Date(), "EEEE, d MMMM yyyy", { locale: id })}</p>
+        <h1 className="font-display text-3xl font-bold text-primary">Assalamu&apos;alaikum 👋</h1>
+        <p className="text-sm text-gray-500 mt-1">{format(new Date(nowMs), "EEEE, d MMMM yyyy", { locale: id })}</p>
       </div>
 
       {/* Anak cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         {anak.map(a => {
           const usia = a.tanggal_lahir
-            ? Math.floor((Date.now() - new Date(a.tanggal_lahir).getTime()) / (1000*60*60*24*365))
+            ? Math.floor((nowMs - new Date(a.tanggal_lahir).getTime()) / (1000*60*60*24*365))
             : null;
           return (
             <div key={a.id} className="card" style={{ borderLeft: "4px solid var(--primary-mid)" }}>
@@ -151,8 +156,8 @@ export default async function OrtuDashboard() {
             <Link href="/ortu/portofolio" className="text-xs text-primary-mid hover:underline">Lihat semua →</Link>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            {recentPortofolio.slice(0,3).map((p: any) => {
-              const foto = p.portofolio_media?.find((m: any) => m.tipe === "foto");
+            {recentPortofolio.slice(0,3).map((p: Portofolio) => {
+              const foto = p.portofolio_media?.find((m: PortofolioMedia) => m.tipe === "foto");
               return (
                 <div key={p.id} className="rounded-xl overflow-hidden bg-primary-pale aspect-square flex items-center justify-center relative">
                   {foto ? (

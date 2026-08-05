@@ -1,10 +1,10 @@
 "use client";
 import { useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { FITRAH_LIST } from "@/types";
+import { FITRAH_LIST, type Siswa } from "@/types";
 import { todayWIB } from "@/lib/date";
 
-export default function PortofolioClient({ siswaList, guruId }: { siswaList: any[]; guruId: string }) {
+export default function PortofolioClient({ siswaList, guruId }: { siswaList: Pick<Siswa, "id" | "nama" | "kelas">[]; guruId: string }) {
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const today = todayWIB();
@@ -56,7 +56,7 @@ export default function PortofolioClient({ siswaList, guruId }: { siswaList: any
     for (const file of files) {
       const ext = file.name.split(".").pop()?.replace(/[^a-zA-Z0-9]/g, "") || "bin";
       const path = `${porto.id}/${Date.now()}.${ext}`;
-      const { data: upload, error: uploadErr } = await supabase.storage
+      const { error: uploadErr } = await supabase.storage
         .from("portofolio").upload(path, file);
       if (uploadErr) continue;
       const { data: urlData } = supabase.storage.from("portofolio").getPublicUrl(path);

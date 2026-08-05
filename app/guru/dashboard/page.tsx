@@ -3,6 +3,12 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { todayWIB } from "@/lib/date";
+import type { DailyReport } from "@/types";
+
+interface HadirHariIniRow {
+  siswa_id: string;
+  kehadiran: string;
+}
 
 export default async function GuruDashboard() {
   const supabase = await createClient();
@@ -112,8 +118,8 @@ export default async function GuruDashboard() {
           </div>
           <div className="space-y-2">
             {siswaList?.map((s) => {
-              const dr = hadirHariIni?.find((r: any) => r.siswa_id === s.id);
-              const status = (dr as any)?.kehadiran ?? "Belum";
+              const dr = hadirHariIni?.find((r: HadirHariIniRow) => r.siswa_id === s.id);
+              const status = dr?.kehadiran ?? "Belum";
               return (
                 <div key={s.id} className="flex items-center justify-between py-2 border-b border-[var(--primary-pale)] last:border-0">
                   <div className="flex items-center gap-3">
@@ -146,7 +152,7 @@ export default async function GuruDashboard() {
             <Link href="/guru/riwayat" className="text-xs text-[var(--primary-mid)] hover:underline">Lihat semua →</Link>
           </div>
           <div className="space-y-3">
-            {recentReports?.map((r: any) => (
+            {recentReports?.map((r: DailyReport) => (
               <div key={r.id} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--cream)]">
                 <span className="text-xl">✅</span>
                 <div className="flex-1 min-w-0">

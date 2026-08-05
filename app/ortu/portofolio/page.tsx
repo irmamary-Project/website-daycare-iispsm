@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { FITRAH_LIST } from "@/types";
+import { FITRAH_LIST, DailyReport, Portofolio } from "@/types";
 import PortfolioMedia from "./Lightbox";
 import PDFExportButton from "@/components/riwayat/PDFExportButton";
 
@@ -38,7 +38,7 @@ export default async function OrtuPortofolioPage() {
         <div className="mb-10">
           <h2 className="font-display text-xl font-bold text-primary mb-4">📋 Laporan Harian Terbaru</h2>
           <div className="space-y-4">
-            {dailyReports.map((r: any) => (
+            {dailyReports.map((r: DailyReport) => (
               <div key={r.id} className="card">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <div>
@@ -102,7 +102,7 @@ export default async function OrtuPortofolioPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {portofolio.map((p: any) => (
+          {portofolio.map((p: Portofolio) => (
             <div key={p.id} className="card">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div>
@@ -122,7 +122,7 @@ export default async function OrtuPortofolioPage() {
                 <PDFExportButton type="portofolio" data={p} filename={`portofolio-${p.siswa?.nama ?? "siswa"}_${p.tanggal}`} />
               </div>
 
-              {p.portofolio_media?.length > 0 && (
+              {p.portofolio_media && p.portofolio_media.length > 0 && (
                 <PortfolioMedia media={p.portofolio_media} />
               )}
 

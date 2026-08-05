@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import type { Siswa } from "@/types";
+
+type SiswaExport = Siswa & {
+  ortu?: { full_name: string | null; phone: string | null } | null;
+};
 
 export async function GET() {
   const supabase = await createClient();
@@ -30,7 +35,7 @@ export async function GET() {
 
   // Build CSV
   const headers = ["nama", "jenis_kelamin", "tanggal_lahir", "kelas", "ortu_nama", "ortu_phone", "status", "catatan"];
-  const rows = siswa.map((s: any) => [
+  const rows = siswa.map((s: SiswaExport) => [
     s.nama,
     s.jenis_kelamin ?? "",
     s.tanggal_lahir ?? "",

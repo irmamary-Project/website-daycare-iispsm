@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { MOOD_OPTIONS, FITRAH_LIST } from "@/types";
+import { MOOD_OPTIONS, FITRAH_LIST, type Siswa } from "@/types";
 import { todayWIB } from "@/lib/date";
 
 const IBADAH_LIST = [
@@ -20,7 +20,7 @@ interface DraftRecord {
   created_at: string;
 }
 
-export default function DailyReportClient({ siswaList, guruId }: { siswaList: any[]; guruId: string }) {
+export default function DailyReportClient({ siswaList, guruId }: { siswaList: Pick<Siswa, "id" | "nama" | "kelas">[]; guruId: string }) {
   const supabase = createClient();
   const today = todayWIB();
 
@@ -48,24 +48,24 @@ export default function DailyReportClient({ siswaList, guruId }: { siswaList: an
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
   const [drafts, setDrafts] = useState<DraftRecord[]>([]);
-  const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [draftRefresh, setDraftRefresh] = useState(0);
 
-  // Fetch drafts when siswaId or tanggal changes
-  const fetchDrafts = useCallback(async () => {
-    if (!siswaId) { setDrafts([]); return; }
-    setLoadingDrafts(true);
-    const { data } = await supabase
-      .from("daily_reports")
-      .select("id, siswa_id, tanggal, sesi, status, kehadiran, created_at")
-      .eq("siswa_id", siswaId)
-      .eq("tanggal", tanggal)
-      .order("created_at", { ascending: true });
-    setDrafts(data ?? []);
-    setLoadingDrafts(false);
-  }, [supabase, siswaId, tanggal]);
-
-  useEffect(() => { fetchDrafts(); }, [fetchDrafts]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!siswaId) { setDrafts([]); return; }
+      const { data } = await supabase
+        .from("daily_reports")
+        .select("id, siswa_id, tanggal, sesi, status, kehadiran, created_at")
+        .eq("siswa_id", siswaId)
+        .eq("tanggal", tanggal)
+        .order("created_at", { ascending: true });
+      if (cancelled) return;
+      setDrafts(data ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, [supabase, siswaId, tanggal, draftRefresh]);
 
   function toggleIbadah(item: string) {
     setIbadah(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]);
@@ -152,11 +152,10 @@ export default function DailyReportClient({ siswaList, guruId }: { siswaList: an
           });
         }
       }
-      fetchDrafts();
+      setDraftRefresh(r => r + 1);
     }
     setSaving(false);
   }
-
   // Sesi yang sudah diisi hari ini
   const filledSesi = drafts.map(d => d.sesi);
   const sesiOptions = ["Pagi", "Siang", "Full Day"].filter(s => {

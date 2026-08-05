@@ -26,7 +26,7 @@ export default async function CCTVLayout({ children }: { children: React.ReactNo
           anak={[]}
         />
       ) : (
-        <GuruSidebarClient profile={profile} unreadCount={count ?? 0} />
+        <GuruSidebarClient profile={profile} />
       )}
       <main className="flex-1 overflow-auto pt-14 lg:pt-0">
         {children}

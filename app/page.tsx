@@ -95,7 +95,7 @@ const FitrahKurikulum = () => {
         ))}
       </div>
       <div className="fitrah-quote-bar">
-        <p>"Perkembangan manusia memiliki sunnatullah — ada tahapan, ada masa emas bagi setiap fitrah."</p>
+        <p>&quot;Perkembangan manusia memiliki sunnatullah — ada tahapan, ada masa emas bagi setiap fitrah.&quot;</p>
         <span>Tahapan: 0-2 thn · 2-6 thn (Pra Latih) · 7-10 thn (Pra Aqil Baligh 1) · 11-14 thn (Pra Aqil Baligh 2) · &gt;15 thn (Post Aqil Baligh)</span>
       </div>
     </section>
@@ -1336,7 +1336,7 @@ footer .f-copy {
         </div>
         <div className="mission">
           <div className="mission-grid">
-            <div className="mission-card"><div className="mission-icon">🕌</div><div className="mission-sub">Menyelenggarakan pendidikan berbasis Al-Qur'an, Sunnah, dan 8 Aspek Fitrah</div></div>
+            <div className="mission-card"><div className="mission-icon">🕌</div><div className="mission-sub">Menyelenggarakan pendidikan berbasis Al-Qur&apos;an, Sunnah, dan 8 Aspek Fitrah</div></div>
             <div className="mission-card"><div className="mission-icon">🌱</div><div className="mission-sub">Mengoptimalkan tumbuh kembang anak di masa golden age melalui stimulasi 8 aspek fitrah</div></div>
           </div>
           <div className="mission-grid">
