@@ -171,13 +171,13 @@ export default function AdminAbsensiPage() {
   };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-serif text-3xl font-bold text-[var(--primary)]">Admin Absensi</h1>
           <p className="text-sm text-gray-500 mt-1">Rekap kehadiran semua guru</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <input
             type="date"
             value={selectedDate}
@@ -194,7 +194,7 @@ export default function AdminAbsensiPage() {
       </div>
 
       {/* Rekap */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 mb-6">
         {[
           { label: "Hadir", value: rekap.hadir, color: "text-green-600", bg: "bg-green-100" },
           { label: "Izin", value: rekap.izin, color: "text-yellow-600", bg: "bg-yellow-100" },
