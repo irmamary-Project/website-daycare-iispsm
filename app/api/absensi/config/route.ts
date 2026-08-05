@@ -1,12 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { getUser, withApi, apiError } from "@/lib/auth";
 
-export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = withApi(async () => {
+  const { supabase } = await getUser();
 
   const { data, error } = await supabase
     .from("geofence_config")
@@ -15,8 +11,8 @@ export async function GET() {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: "Config not found" }, { status: 500 });
+    return apiError(404, "Config not found");
   }
 
   return NextResponse.json(data);
-}
+});

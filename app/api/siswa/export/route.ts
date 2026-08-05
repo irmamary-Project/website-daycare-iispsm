@@ -1,28 +1,14 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { requireAdmin, withApi, apiError } from "@/lib/auth";
+import { escapeCsv } from "@/lib/csv";
 import type { Siswa } from "@/types";
 
 type SiswaExport = Siswa & {
   ortu?: { full_name: string | null; phone: string | null } | null;
 };
 
-export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // Cek admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+export const GET = withApi(async () => {
+  const { supabase } = await requireAdmin();
 
   const { data: siswa } = await supabase
     .from("siswa")
@@ -30,7 +16,7 @@ export async function GET() {
     .order("nama");
 
   if (!siswa) {
-    return NextResponse.json({ error: "Gagal mengambil data" }, { status: 500 });
+    return apiError(500, "Gagal mengambil data");
   }
 
   // Build CSV
@@ -46,16 +32,9 @@ export async function GET() {
     s.catatan ?? "",
   ]);
 
-  function escapeCsv(val: string) {
-    if (val.includes(",") || val.includes('"') || val.includes("\n")) {
-      return `"${val.replace(/"/g, '""')}"`;
-    }
-    return val;
-  }
-
   const csv = [
     headers.join(","),
-    ...rows.map(row => row.map(escapeCsv).join(","))
+    ...rows.map((row) => row.map(escapeCsv).join(",")),
   ].join("\n");
 
   return new NextResponse(csv, {
@@ -64,4 +43,4 @@ export async function GET() {
       "Content-Disposition": `attachment; filename="data-siswa-${new Date().toISOString().split("T")[0]}.csv"`,
     },
   });
-}
+});

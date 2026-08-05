@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getUser, withApi, apiError } from "@/lib/auth";
 
 // -----------------------------------------------------------------------------
 // GET /api/cctv/stream-url
@@ -38,15 +38,8 @@ function isRateLimited(key: string): boolean {
   return hits.length > RATE_LIMIT_MAX_REQUESTS;
 }
 
-export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = withApi(async () => {
+  const { supabase, user } = await getUser();
 
   // Defense in depth: middleware.ts already blocks unauthenticated access to
   // every non-public route, but this route checks again independently since
@@ -59,11 +52,11 @@ export async function GET() {
     .single();
 
   if (!profile?.role) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return apiError(403, "Forbidden");
   }
 
   if (isRateLimited(user.id)) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return apiError(429, "Too many requests");
   }
 
   const cameras: Camera[] = [
@@ -80,10 +73,7 @@ export async function GET() {
   ].filter((cam) => cam.url);
 
   if (cameras.length === 0) {
-    return NextResponse.json(
-      { error: "CCTV belum dikonfigurasi. Hubungi admin." },
-      { status: 503 }
-    );
+    return apiError(503, "CCTV belum dikonfigurasi. Hubungi admin.");
   }
 
   return NextResponse.json(
@@ -95,4 +85,4 @@ export async function GET() {
       },
     }
   );
-}
+});

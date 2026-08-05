@@ -1,12 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { getUser, withApi, apiError } from "@/lib/auth";
 
-export async function GET(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = withApi(async (request) => {
+  const { supabase, user } = await getUser();
 
   const { searchParams } = new URL(request.url);
   const bulan = searchParams.get("bulan"); // format: YYYY-MM
@@ -44,8 +40,8 @@ export async function GET(request: Request) {
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(500, error.message);
   }
 
   return NextResponse.json(data);
-}
+});

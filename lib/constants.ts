@@ -2,6 +2,10 @@ export const SUPABASE_STORAGE_URL = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL
 
 export const LOGO_URL = `${SUPABASE_STORAGE_URL}/LOGO%20IIS/energia.png`;
 
+export const SISWA_STATUS = ["aktif", "cuti", "alumni", "pending", "ditolak"] as const;
+
+export const ABSENSI_STATUS = ["Hadir", "Izin", "Sakit", "Alpha", "Cuti"] as const;
+
 export const FACILITIES_IMG_URL = "https://dwmpoeqjjrpqdruanhxi.supabase.co/storage/v1/object/public/gallery/facilities.jpg";
 
 export const GALLERY_BASE_URL = "https://dwmpoeqjjrpqdruanhxi.supabase.co/storage/v1/object/public/gallery";

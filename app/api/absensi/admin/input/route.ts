@@ -1,33 +1,18 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { requireAdmin, withApi, apiError } from "@/lib/auth";
+import { ABSENSI_STATUS } from "@/lib/constants";
 
-export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // Cek admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+export const POST = withApi(async (request) => {
+  const { supabase } = await requireAdmin();
   const body = await request.json();
   const { guru_id, tanggal, status, keterangan } = body;
 
   if (!guru_id || !tanggal || !status) {
-    return NextResponse.json({ error: "guru_id, tanggal, status wajib diisi" }, { status: 400 });
+    return apiError(400, "guru_id, tanggal, status wajib diisi");
   }
 
-  if (!["Hadir", "Izin", "Sakit", "Alpha", "Cuti"].includes(status)) {
-    return NextResponse.json({ error: "Status tidak valid" }, { status: 400 });
+  if (!ABSENSI_STATUS.includes(status)) {
+    return apiError(400, "Status tidak valid");
   }
 
   // Cek apakah sudah ada record
@@ -59,7 +44,7 @@ export async function POST(request: Request) {
       .eq("id", existing.id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return apiError(500, error.message);
     }
   } else {
     // Insert baru
@@ -73,9 +58,9 @@ export async function POST(request: Request) {
     const { error } = await supabase.from("absensi_guru").insert(insertData);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return apiError(500, error.message);
     }
   }
 
   return NextResponse.json({ success: true });
-}
+});

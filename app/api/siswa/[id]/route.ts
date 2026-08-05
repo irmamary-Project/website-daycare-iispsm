@@ -1,28 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { requireAdmin, withApi, apiError } from "@/lib/auth";
+import { SISWA_STATUS } from "@/lib/constants";
 
-const VALID_STATUS = ["aktif", "cuti", "alumni", "pending", "ditolak"];
-
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+export const PATCH = withApi(async (request, context) => {
+  const { id } = await context.params!;
+  const { supabase } = await requireAdmin();
 
   const body = await request.json();
   const payload: Record<string, unknown> = {};
@@ -32,11 +14,11 @@ export async function PATCH(
   if (body.tanggal_lahir !== undefined) payload.tanggal_lahir = body.tanggal_lahir || null;
   if (typeof body.kelas === "string") payload.kelas = body.kelas;
   if (body.ortu_id !== undefined) payload.ortu_id = body.ortu_id || null;
-  if (VALID_STATUS.includes(body.status)) payload.status = body.status;
+  if (SISWA_STATUS.includes(body.status)) payload.status = body.status;
   if (body.catatan !== undefined) payload.catatan = body.catatan || null;
 
   if (Object.keys(payload).length === 0) {
-    return NextResponse.json({ error: "Tidak ada data yang diubah" }, { status: 400 });
+    return apiError(400, "Tidak ada data yang diubah");
   }
 
   const { data, error } = await supabase
@@ -47,38 +29,21 @@ export async function PATCH(
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(500, error.message);
   }
 
   return NextResponse.json({ data });
-}
+});
 
-export async function DELETE(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+export const DELETE = withApi(async (_request, context) => {
+  const { id } = await context.params!;
+  const { supabase } = await requireAdmin();
 
   const { error } = await supabase.from("siswa").delete().eq("id", id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(500, error.message);
   }
 
   return NextResponse.json({ success: true });
-}
+});

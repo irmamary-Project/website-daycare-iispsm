@@ -1,25 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { requireAdmin, withApi, apiError } from "@/lib/auth";
+import { SISWA_STATUS } from "@/lib/constants";
 
-const VALID_STATUS = ["aktif", "cuti", "alumni", "pending", "ditolak"];
-
-export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+export const POST = withApi(async (request) => {
+  const { supabase } = await requireAdmin();
   const body = await request.json();
   const {
     nama, jenis_kelamin, tanggal_lahir, kelas,
@@ -27,10 +11,10 @@ export async function POST(request: Request) {
   } = body;
 
   if (!nama || typeof nama !== "string" || !nama.trim()) {
-    return NextResponse.json({ error: "Nama siswa wajib diisi" }, { status: 400 });
+    return apiError(400, "Nama siswa wajib diisi");
   }
   if (!kelas || typeof kelas !== "string") {
-    return NextResponse.json({ error: "Kelas wajib diisi" }, { status: 400 });
+    return apiError(400, "Kelas wajib diisi");
   }
 
   const { data, error } = await supabase
@@ -41,15 +25,15 @@ export async function POST(request: Request) {
       tanggal_lahir: tanggal_lahir || null,
       kelas,
       ortu_id: ortu_id || null,
-      status: VALID_STATUS.includes(status) ? status : "aktif",
+      status: SISWA_STATUS.includes(status) ? status : "aktif",
       catatan: catatan || null,
     })
     .select()
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(500, error.message);
   }
 
   return NextResponse.json({ data }, { status: 201 });
-}
+});

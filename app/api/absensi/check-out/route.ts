@@ -1,49 +1,30 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { getUser, withApi, apiError } from "@/lib/auth";
+import { haversineDistance, getGeofenceConfig } from "@/lib/geo";
 import { todayWIB } from "@/lib/date";
 
-function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371e3;
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const POST = withApi(async (request) => {
+  const { supabase, user } = await getUser();
 
   const body = await request.json();
   const { latitude, longitude } = body;
 
   if (typeof latitude !== "number" || typeof longitude !== "number") {
-    return NextResponse.json({ error: "Lokasi tidak valid" }, { status: 400 });
+    return apiError(400, "Lokasi tidak valid");
   }
 
-  // Ambil config geofence
-  const { data: config } = await supabase
-    .from("geofence_config")
-    .select("latitude, longitude, radius_meter")
-    .limit(1)
-    .single();
+  const config = await getGeofenceConfig(supabase);
 
   if (!config) {
-    return NextResponse.json({ error: "Geofence belum dikonfigurasi" }, { status: 500 });
+    return apiError(503, "Geofence belum dikonfigurasi");
   }
 
   // Validasi jarak server-side
   const distance = haversineDistance(latitude, longitude, config.latitude, config.longitude);
   if (distance > config.radius_meter) {
-    return NextResponse.json(
-      { error: `Anda berada ${Math.round(distance)}m dari lokasi sekolah. Maksimal ${config.radius_meter}m.` },
-      { status: 403 }
+    return apiError(
+      400,
+      `Anda berada ${Math.round(distance)}m dari lokasi sekolah. Maksimal ${config.radius_meter}m.`
     );
   }
 
@@ -58,11 +39,11 @@ export async function POST(request: Request) {
     .single();
 
   if (!existing?.check_in) {
-    return NextResponse.json({ error: "Anda belum check-in hari ini" }, { status: 400 });
+    return apiError(400, "Anda belum check-in hari ini");
   }
 
   if (existing.check_out) {
-    return NextResponse.json({ error: "Anda sudah check-out hari ini" }, { status: 400 });
+    return apiError(400, "Anda sudah check-out hari ini");
   }
 
   const now = new Date().toISOString();
@@ -77,8 +58,8 @@ export async function POST(request: Request) {
     .eq("id", existing.id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(500, error.message);
   }
 
   return NextResponse.json({ success: true, distance: Math.round(distance) });
-}
+});

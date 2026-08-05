@@ -1,24 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { requireAdmin, withApi, apiError } from "@/lib/auth";
 
-export async function PUT(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // Cek admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+export const PUT = withApi(async (request) => {
+  const { supabase } = await requireAdmin();
   const body = await request.json();
   const { latitude, longitude, radius_meter, nama_lokasi } = body;
 
@@ -30,7 +14,7 @@ export async function PUT(request: Request) {
     .single();
 
   if (!existing) {
-    return NextResponse.json({ error: "Config not found" }, { status: 500 });
+    return apiError(404, "Config not found");
   }
 
   const updateData: Record<string, unknown> = {};
@@ -47,8 +31,8 @@ export async function PUT(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(500, error.message);
   }
 
   return NextResponse.json(data);
-}
+});
