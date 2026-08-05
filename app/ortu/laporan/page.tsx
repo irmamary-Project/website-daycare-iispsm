@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FITRAH_LIST, CAPAIAN_OPTIONS } from "@/types";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import PDFExportButton from "@/components/riwayat/PDFExportButton";
 
 
 export default async function OrtuLaporanPage() {
@@ -34,12 +35,15 @@ export default async function OrtuLaporanPage() {
         <div className="space-y-8">
           {laporans.map((l: any) => (
             <div key={l.id} className="card">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
                 <div>
                   <h2 className="font-serif text-2xl font-bold text-primary">{l.periode}</h2>
                   <p className="text-sm text-gray-500">{l.siswa?.nama} · {l.siswa?.kelas}</p>
                 </div>
-                <span className="badge-sent">Laporan Resmi</span>
+                <div className="flex items-center gap-2">
+                  <span className="badge-sent">Laporan Resmi</span>
+                  <PDFExportButton type="laporan" data={l} filename={`laporan-triwulan_${l.periode}_${l.siswa?.nama ?? "siswa"}`} />
+                </div>
               </div>
 
               {/* Fitrah grid */}

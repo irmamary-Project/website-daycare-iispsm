@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { FITRAH_LIST } from "@/types";
 import PortfolioMedia from "./Lightbox";
+import PDFExportButton from "@/components/riwayat/PDFExportButton";
 
 export default async function OrtuPortofolioPage() {
   const supabase = await createClient();
@@ -21,7 +22,7 @@ export default async function OrtuPortofolioPage() {
 
   const { data: dailyReports } = await supabase
     .from("daily_reports")
-    .select("*,siswa(nama)")
+    .select("*,siswa(nama, kelas)")
     .in("siswa_id", anakIds)
     .eq("status", "terkirim")
     .order("tanggal", { ascending: false })
@@ -39,12 +40,15 @@ export default async function OrtuPortofolioPage() {
           <div className="space-y-4">
             {dailyReports.map((r: any) => (
               <div key={r.id} className="card">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <div>
                     <span className="font-semibold text-gray-800">{r.siswa?.nama}</span>
                     <span className="text-sm text-gray-400 ml-2">{format(new Date(r.tanggal), "EEEE, d MMMM yyyy", { locale: id })}</span>
                   </div>
-                  <span className={r.kehadiran === "Hadir" ? "badge-hadir" : "badge-izin"}>{r.kehadiran}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={r.kehadiran === "Hadir" ? "badge-hadir" : "badge-izin"}>{r.kehadiran}</span>
+                    <PDFExportButton type="daily" data={r} filename={`daily-report-${r.siswa?.nama ?? "siswa"}_${r.tanggal}`} />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
@@ -100,19 +104,22 @@ export default async function OrtuPortofolioPage() {
         <div className="space-y-6">
           {portofolio.map((p: any) => (
             <div key={p.id} className="card">
-              <div className="mb-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-gray-800">{p.siswa?.nama}</span>
-                  <span className="text-sm text-gray-400">{format(new Date(p.tanggal), "d MMMM yyyy", { locale: id })}</span>
-                </div>
-                {p.fitrah?.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {p.fitrah.map((key: string) => {
-                      const f = FITRAH_LIST.find(fl => fl.key === key);
-                      return f ? <span key={key} className="text-xs bg-primary-pale text-primary px-2 py-0.5 rounded-full">{f.icon} {f.label}</span> : null;
-                    })}
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-gray-800">{p.siswa?.nama}</span>
+                    <span className="text-sm text-gray-400">{format(new Date(p.tanggal), "d MMMM yyyy", { locale: id })}</span>
                   </div>
-                )}
+                  {p.fitrah?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {p.fitrah.map((key: string) => {
+                        const f = FITRAH_LIST.find(fl => fl.key === key);
+                        return f ? <span key={key} className="text-xs bg-primary-pale text-primary px-2 py-0.5 rounded-full">{f.icon} {f.label}</span> : null;
+                      })}
+                    </div>
+                  )}
+                </div>
+                <PDFExportButton type="portofolio" data={p} filename={`portofolio-${p.siswa?.nama ?? "siswa"}_${p.tanggal}`} />
               </div>
 
               {p.portofolio_media?.length > 0 && (

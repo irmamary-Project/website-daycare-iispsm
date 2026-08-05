@@ -1,6 +1,7 @@
 import type jsPDF from "jspdf";
 import type { DailyReport, Portofolio, LaporanTriwulan } from "@/types";
 import { FITRAH_LIST, CAPAIAN_OPTIONS } from "@/types";
+import { KPSP_DATA } from "@/app/guru/skrining/kpsp-data";
 
 const MONTHS = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const PAGE_W = 210;
@@ -489,4 +490,184 @@ export async function generateLaporanPDF(laporan: LaporanTriwulan & { siswa?: { 
   doc.text(statusParts.join("  ·  "), PAGE_W - MARGIN_R, y, { align: "right" });
 
   return doc;
+}
+
+export interface SkriningRecord {
+  id: string;
+  usia_bulan: number;
+  kelompok_usia: string;
+  tanggal_skrining: string;
+  skor_ya: number;
+  skor_tidak: number;
+  kode_interpretasi: string;
+  interpretasi: string;
+  jawaban: Record<string, string>;
+  catatan_per_soal: Record<string, string>;
+  catatan_umum: string;
+  siswa?: {
+    nama: string;
+    kelas: string;
+    tanggal_lahir: string;
+  } | null;
+}
+
+const SKRINING_DESC: Record<string, string> = {
+  S: "Perkembangan anak sesuai dengan usianya.",
+  M: "Perkembangan anak perlu dipantau lebih lanjut. Disarankan pemeriksaan ulang dalam 1-2 bulan.",
+  P: "Perkembangan anak terdapat penyimpangan. Segera rujuk ke fasilitas kesehatan untuk pemeriksaan lebih lanjut.",
+};
+
+export async function generateSkriningPDF(sk: SkriningRecord) {
+  const JsPdf = await getDoc();
+  const doc = new JsPdf("p", "mm", "a4");
+  let y = 25;
+
+  y = header(doc, "Hasil Skrining Perkembangan (KPSP)", "IIS PSM Daycare & Preschool Magetan",
+    `Kelompok Usia ${sk.kelompok_usia} · ${fmtDate(sk.tanggal_skrining)}`, y);
+
+  y = field(doc, "Nama Anak", sk.siswa?.nama ?? "-", y);
+  if (sk.siswa?.tanggal_lahir) y = field(doc, "Tanggal Lahir", fmtDate(sk.siswa.tanggal_lahir), y);
+  y = field(doc, "Usia", `${sk.usia_bulan} bulan`, y);
+  y = field(doc, "Kelas", sk.siswa?.kelas ?? "-", y);
+
+  // Tabel jawaban
+  const questionKeys = Object.keys(sk.jawaban ?? {}).sort((a, b) => {
+    const [, idA] = a.split("-");
+    const [, idB] = b.split("-");
+    return Number(idA) - Number(idB);
+  });
+
+  const rows: string[][] = questionKeys.map((key, i) => {
+    const [, idStr] = key.split("-");
+    const id = Number(idStr);
+    const ageGroup = KPSP_DATA.find((g) => key.startsWith(`${g.months}-`));
+    const q = ageGroup?.questions.find((qq) => qq.id === id);
+    const ans = sk.jawaban[key] === "ya" ? "Ya" : "Tidak";
+    const note = sk.catatan_per_soal?.[key] ? ` (${sk.catatan_per_soal[key]})` : "";
+    return [String(id), q?.text ?? `Soal ${id}`, q?.category ?? "-", ans + note];
+  });
+
+  y = checkPageBreak(doc, y, 16);
+  y += 4;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(50, 50, 50);
+  doc.text("Daftar Jawaban", MARGIN_L, y);
+  y += 6;
+
+  y = drawTable(doc, ["No", "Pertanyaan", "Kategori", "Jawaban"],
+    [12, 115, 35, 28], rows, y);
+
+  // Ringkasan skor
+  y = checkPageBreak(doc, y, 12);
+  y += 2;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(50, 50, 50);
+  doc.text(`Skor Ya: ${sk.skor_ya}  |  Skor Tidak: ${sk.skor_tidak}`, MARGIN_L, y);
+  y += 6;
+
+  // Interpretasi
+  const code = sk.kode_interpretasi ?? "S";
+  const codeColor: Record<string, [number, number, number]> = {
+    S: [34, 197, 94],
+    M: [202, 138, 4],
+    P: [220, 38, 38],
+  };
+  const rgb = codeColor[code] ?? codeColor.S;
+
+  y = checkPageBreak(doc, y, 20);
+  y += 2;
+  doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
+  doc.setLineWidth(0.8);
+  doc.roundedRect(MARGIN_L, y, CONTENT_W, 24, 3, 3, "S");
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(rgb[0], rgb[1], rgb[2]);
+  doc.text(`Interpretasi: ${sk.interpretasi ?? (code === "S" ? "Sesuai" : code === "M" ? "Meragukan" : "Penyimpangan")}`, MARGIN_L + 5, y + 7);
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(60, 60, 60);
+  const descLines = doc.splitTextToSize(SKRINING_DESC[code] ?? "", CONTENT_W - 10);
+  doc.text(descLines, MARGIN_L + 5, y + 13);
+  doc.setLineWidth(0.2);
+
+  y += 28;
+
+  if (sk.catatan_umum) {
+    y = checkPageBreak(doc, y, 20);
+    y = sectionDivider(doc, y);
+    y = textBlock(doc, "Catatan", sk.catatan_umum, y);
+  }
+
+  y = checkPageBreak(doc, y, 30);
+  y += 4;
+  y = sectionDivider(doc, y);
+
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  const signY = y + 10;
+  doc.text("Orang Tua/Wali", MARGIN_L, signY);
+  doc.text("Petugas Skrining", MARGIN_L + 60, signY);
+  doc.text("( _____________________ )", MARGIN_L, signY + 16);
+  doc.text("( _____________________ )", MARGIN_L + 60, signY + 16);
+
+  return doc;
+}
+
+export async function generateDataSiswaPDF(siswaList: {
+  nama: string;
+  jenis_kelamin?: string | null;
+  tanggal_lahir?: string | null;
+  kelas: string;
+  status: string;
+  catatan?: string | null;
+  ortu?: { full_name?: string; phone?: string } | null;
+}[]) {
+  const JsPdf = await getDoc();
+  const doc = new JsPdf("p", "mm", "a4");
+  let y = 25;
+
+  y = header(doc, "Data Siswa", "IIS PSM Daycare & Preschool Magetan",
+    `Total: ${siswaList.length} siswa · Dibuat ${fmtDateTime(new Date().toISOString())}`, y);
+
+  const rows = siswaList.map((s) => {
+    const usia = s.tanggal_lahir ? fmtAge(s.tanggal_lahir) : "-";
+    return [
+      s.nama,
+      s.kelas,
+      usia,
+      s.jenis_kelamin === "P" ? "Perempuan" : s.jenis_kelamin === "L" ? "Laki-laki" : "-",
+      s.ortu?.full_name ?? "-",
+      s.status,
+      s.catatan ?? "-",
+    ];
+  });
+
+  y = drawTable(doc, ["Nama", "Kelas", "Usia", "JK", "Orang Tua", "Status", "Catatan"],
+    [38, 38, 18, 20, 32, 16, 28], rows, y);
+
+  y = checkPageBreak(doc, y, 10);
+  y = sectionDivider(doc, y);
+  doc.setFontSize(9);
+  doc.setTextColor(150, 150, 150);
+  doc.text(`Dibuat: ${fmtDateTime(new Date().toISOString())}`, PAGE_W - MARGIN_R, y, { align: "right" });
+
+  return doc;
+}
+
+function fmtAge(birthDate: string): string {
+  const birth = new Date(birthDate);
+  const now = new Date();
+  let years = now.getFullYear() - birth.getFullYear();
+  let months = now.getMonth() - birth.getMonth();
+  if (months < 0) { years--; months += 12; }
+  if (now.getDate() < birth.getDate()) months--;
+  if (months < 0) { years--; months += 12; }
+  if (years === 0 && months === 0) return "0 bulan";
+  if (years === 0) return `${months} bln`;
+  if (months === 0) return `${years} thn`;
+  return `${years} thn ${months} bln`;
 }

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Siswa, Profile, KELAS_LIST } from "@/types";
+import { generateDataSiswaPDF } from "@/lib/pdf";
 
 interface Props {
   siswaList: (Siswa & { ortu?: Profile })[];
@@ -30,6 +31,7 @@ export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin 
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState<string>("");
+  const [exportingPDF, setExportingPDF] = useState(false);
 
   function hitungUsia(tglLahir: string): string {
     if (!tglLahir) return "–";
@@ -106,6 +108,18 @@ export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin 
     URL.revokeObjectURL(url);
   }
 
+  // Export PDF (data yang sedang difilter)
+  async function handleExportPDF() {
+    if (exportingPDF) return;
+    setExportingPDF(true);
+    try {
+      const doc = await generateDataSiswaPDF(filtered);
+      doc.save(`data-siswa-${new Date().toISOString().split("T")[0]}.pdf`);
+    } finally {
+      setExportingPDF(false);
+    }
+  }
+
   // Import CSV
   async function handleImport() {
     if (!importFile) return;
@@ -145,6 +159,7 @@ export default function DataSiswaClient({ siswaList: initial, ortuList, isAdmin 
           {isAdmin && (
             <>
               <button onClick={handleExport} className="btn-outline">📥 Export CSV</button>
+              <button onClick={handleExportPDF} disabled={exportingPDF} className="btn-outline">📄 Export PDF</button>
               <button onClick={() => { setShowImportModal(true); setImportFile(null); setImportResult(""); }} className="btn-outline">📤 Import CSV</button>
             </>
           )}

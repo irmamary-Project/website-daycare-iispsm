@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { generateSkriningPDF } from "@/lib/pdf";
 
 interface Screening {
   id: string;
@@ -33,8 +34,20 @@ const interpretationStyles: Record<string, { bg: string; text: string; border: s
 export default function RiwayatSkriningClient({ screenings }: { screenings: Screening[] }) {
   const [selected, setSelected] = useState<Screening | null>(null);
   const [filter, setFilter] = useState<"all" | "S" | "M" | "P">("all");
+  const [exporting, setExporting] = useState(false);
 
   const filtered = screenings.filter((s) => filter === "all" || s.kode_interpretasi === filter);
+
+  async function handleExportPDF(s: Screening) {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const doc = await generateSkriningPDF(s);
+      doc.save(`skrining-kpsp_${s.siswa?.nama ?? "siswa"}_${s.tanggal_skrining}.pdf`);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const stats = {
     total: screenings.length,
@@ -175,6 +188,14 @@ export default function RiwayatSkriningClient({ screenings }: { screenings: Scre
                         <p className="text-gray-600">{s.catatan_umum}</p>
                       </div>
                     )}
+
+                    <button
+                      onClick={() => handleExportPDF(s)}
+                      disabled={exporting}
+                      className="mt-4 btn-primary text-sm"
+                    >
+                      {exporting ? "Membuat PDF..." : "📄 Export PDF"}
+                    </button>
                   </div>
                 )}
               </div>
