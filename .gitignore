@@ -7,3 +7,7 @@ node_modules
 ._distill_query*.py
 supabase/migrations/*.sql
 supabase/schema.sql
+.vercel
+.env*
+
+.vercel
