@@ -54,13 +54,25 @@ export default function PortofolioClient({ siswaList, guruId }: { siswaList: Pic
     if (error) { setMsg("Gagal: " + error.message); setSaving(false); return; }
 
     // 2. Upload files to cPanel hosting
+    // Fetch upload URL from API route (server-side env variable)
+    let uploadUrl = "";
+    try {
+      const configRes = await fetch("/api/config/upload-url");
+      const configData = await configRes.json();
+      uploadUrl = configData.uploadUrl;
+    } catch {
+      setMsg("Gagal memuat konfigurasi upload.");
+      setSaving(false);
+      return;
+    }
+
     for (const file of files) {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('portfolio_id', porto.id);
 
       try {
-        const uploadRes = await fetch(process.env.NEXT_PUBLIC_UPLOAD_URL!, {
+        const uploadRes = await fetch(uploadUrl, {
           method: 'POST',
           body: formData,
         });

@@ -15,11 +15,12 @@
 
 ### Sudah Selesai (Otomatis)
 
-- [x] Update `.env.local` - tambah `NEXT_PUBLIC_UPLOAD_URL`
+- [x] Update `.env.local` - tambah `NEXT_UPLOAD_URL`
 - [x] Update `.env.local.example` - tambah template env variable
 - [x] Update `lib/constants.ts` - tambah `PORTFOLIO_STORAGE_URL`
 - [x] Update `next.config.ts` - tambah domain ke `remotePatterns`
 - [x] Modifikasi `PortofolioClient.tsx` - ganti logic upload ke PHP endpoint
+- [x] Buat API route `/api/config/upload-url` - serve upload URL ke client
 
 ### Perlu Anda Lakukan Manual (di cPanel)
 
@@ -110,7 +111,7 @@ Migrasi penyimpanan file portofolio (foto/video) dari **Supabase Storage** ke **
 
 | File | Aksi | Deskripsi |
 |---|---|---|
-| `.env.local` | Tambah | Tambah `NEXT_PUBLIC_UPLOAD_URL` |
+| `.env.local` | Tambah | Tambah `NEXT_UPLOAD_URL` |
 | `lib/constants.ts` | Tambah | Tambah `PORTFOLIO_STORAGE_URL` |
 | `next.config.ts` | Ubah | Tambah domain hosting ke `remotePatterns` |
 | `app/guru/portofolio/PortofolioClient.tsx` | Ubah | Ganti logic upload ke PHP endpoint |
@@ -301,7 +302,7 @@ File: `.env.local`
 
 ```env
 # Upload endpoint (baru)
-NEXT_PUBLIC_UPLOAD_URL=https://lumizo.my.id/energia/uploads/upload.php
+NEXT_UPLOAD_URL=https://lumizo.my.id/energia/uploads/upload.php
 UPLOAD_API_KEY=your-secret-key-here
 ```
 
@@ -316,7 +317,7 @@ Tambahkan di **line 15** (setelah `OG_IMAGE_URL`):
 ```typescript
 // Base URL untuk file portofolio yang disimpan di cPanel hosting
 export const PORTFOLIO_STORAGE_URL = 
-  process.env.NEXT_PUBLIC_UPLOAD_URL?.replace('/upload.php', '/portofolio') 
+  process.env.NEXT_UPLOAD_URL?.replace('/upload.php', '/portofolio') 
   ?? "https://lumizo.my.id/energia/uploads/portofolio";
 ```
 
@@ -365,7 +366,7 @@ File: `app/guru/portofolio/PortofolioClient.tsx`
       formData.append('portfolio_id', porto.id);
 
       try {
-        const uploadRes = await fetch(process.env.NEXT_PUBLIC_UPLOAD_URL!, {
+        const uploadRes = await fetch(process.env.NEXT_UPLOAD_URL!, {
           method: 'POST',
           body: formData,
         });
