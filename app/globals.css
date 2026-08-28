@@ -15,11 +15,49 @@
   --cream:         #F8F9FF;
   --cream2:        #FFFBF5;
   --white:         #ffffff;
-  --text:          #1a1a1a;
+  --text:          #1A237E;
   --muted:         #5a5a5a;
   --light:         #8a8a8a;
   --radius:        12px;
   --radius-lg:     20px;
+
+  /* Warna-warni logo (dari energia-theme) */
+  --gold-pale:         #FFF3E0;
+  --teal:              #00BCD4;
+  --teal-pale:         #E0F7FA;
+  --magenta:           #E91E8C;
+  --magenta-pale:      #FCE4EC;
+  --logo-green:        #4CAF50;
+  --logo-green-pale:   #E8F5E9;
+  --purple:            #673AB7;
+  --purple-pale:       #F3E5F5;
+  --amber:             #FFC107;
+  --amber-pale:        #FFF9C4;
+
+  /* Teks tambahan */
+  --text-body:         #455A64;
+  --text-muted:        #90A4AE;
+  --text-light:        #B0BEC5;
+
+  /* Sidebar (dipakai komponen lama) */
+  --sidebar-bg:         #1A237E;
+  --sidebar-hover:      rgba(255, 255, 255, 0.10);
+  --sidebar-active:     rgba(255, 255, 255, 0.16);
+  --sidebar-border:     rgba(255, 255, 255, 0.10);
+  --sidebar-text:       rgba(255, 255, 255, 0.65);
+  --sidebar-text-active: #FFFFFF;
+
+  /* Legacy aliases (agar kode lama tetap jalan) */
+  --green-dark:        #1A237E;
+  --green-mid:         #3949AB;
+  --green-pale:        #E8EAF6;
+  --green-border:      #C5CAE9;
+
+  /* Border radius & shadow */
+  --radius-sm:         8px;
+  --shadow-sm:  0 2px 8px rgba(26, 35, 126, 0.08);
+  --shadow-md:  0 8px 24px rgba(26, 35, 126, 0.12);
+  --shadow-lg:  0 16px 48px rgba(26, 35, 126, 0.16);
 }
 
 @layer base {

@@ -9,4 +9,26 @@ node_modules
 .env*
 tsconfig.tsbuildinfo
 
-.vercel
+# Migration & backup files (sensitive)
+*.sql
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!postcss.config.mjs
+!tailwind.config.ts
+
+# Scripts (not part of app)
+*.ps1
+backup-portofolio*.js
+check-portofolio-data.js
+migrate-storage.js
+update-portofolio-urls.js
+
+# Documentation (not for repo)
+PLAN-MIGRASI-STORAGE.md
+MIGRATION_SUMMARY.md
+
+# Temp files
+supabase/.temp/
+.opencode/
