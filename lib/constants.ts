@@ -13,6 +13,11 @@ export const FACILITIES_IMG_URL = `${GALLERY_STORAGE_URL}/gallery/facilities.jpg
 export const GALLERY_BASE_URL = `${GALLERY_STORAGE_URL}/gallery`;
 export const OG_IMAGE_URL = `${SUPABASE_STORAGE_URL}/og_image/og-image.png`;
 
+// Base URL untuk file portofolio yang disimpan di cPanel hosting
+export const PORTFOLIO_STORAGE_URL =
+  process.env.NEXT_PUBLIC_UPLOAD_URL?.replace('/upload.php', '/portofolio')
+  ?? "https://lumizo.my.id/energia/uploads/portofolio";
+
 export const SISWA_STATUS = ["aktif", "cuti", "alumni", "pending", "ditolak"] as const;
 
 export const ABSENSI_STATUS = ["Hadir", "Izin", "Sakit", "Alpha", "Cuti"] as const;

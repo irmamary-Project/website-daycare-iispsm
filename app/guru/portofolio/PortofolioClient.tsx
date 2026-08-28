@@ -53,21 +53,31 @@ export default function PortofolioClient({ siswaList, guruId }: { siswaList: Pic
 
     if (error) { setMsg("Gagal: " + error.message); setSaving(false); return; }
 
-    // 2. Upload files to Supabase Storage
+    // 2. Upload files to cPanel hosting
     for (const file of files) {
-      const ext = file.name.split(".").pop()?.replace(/[^a-zA-Z0-9]/g, "") || "bin";
-      const path = `${porto.id}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage
-        .from("portofolio").upload(path, file);
-      if (uploadErr) continue;
-      const { data: urlData } = supabase.storage.from("portofolio").getPublicUrl(path);
-      await supabase.from("portofolio_media").insert({
-        portofolio_id: porto.id,
-        url: urlData.publicUrl,
-        tipe: file.type.startsWith("video") ? "video" : "foto",
-        nama_file: file.name,
-        ukuran_bytes: file.size,
-      });
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('portfolio_id', porto.id);
+
+      try {
+        const uploadRes = await fetch(process.env.NEXT_PUBLIC_UPLOAD_URL!, {
+          method: 'POST',
+          body: formData,
+        });
+        const uploadData = await uploadRes.json();
+
+        if (uploadData.success) {
+          await supabase.from("portofolio_media").insert({
+            portofolio_id: porto.id,
+            url: uploadData.url,
+            tipe: file.type.startsWith("video") ? "video" : "foto",
+            nama_file: file.name,
+            ukuran_bytes: file.size,
+          });
+        }
+      } catch {
+        continue; // Skip failed uploads
+      }
     }
 
     // 3. Notifikasi ortu jika dikirim
